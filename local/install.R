@@ -1,4 +1,4 @@
 
 source("local/functions.R")
-jmvtools::install()
+#jmvtools::install()
 installme("NeuroStatsj")
