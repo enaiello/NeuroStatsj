@@ -21,10 +21,10 @@ items:
          type: number
          title: F
        - name: df1
-         type: number
+         type: integer
          title: df1
        - name: df2
-         type: number
+         type: integer
          title: df2
        - name: p
          title: p
@@ -46,18 +46,15 @@ items:
        - name: b
          type: number
          title: "Coef"
-       - name: r2
+       - name: se
          type: number
-         title: R²
-       - name: ftest
+         title: SE
+       - name: t
          type: number
-         title: F
-       - name: df1
-         type: number
-         title: df1
-       - name: df2
-         type: number
-         title: df2
+         title: t
+       - name: df
+         type: integer
+         title: df
        - name: p
          title: p
          type: number

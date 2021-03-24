@@ -109,7 +109,8 @@ ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ScoringResults",
     inherit = jmvcore::Group,
     active = list(
-        univariate = function() private$.items[["univariate"]]),
+        univariate = function() private$.items[["univariate"]],
+        multiple = function() private$.items[["multiple"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -140,12 +141,46 @@ ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="F"),
                     list(
                         `name`="df1", 
-                        `type`="number", 
+                        `type`="integer", 
                         `title`="df1"),
                     list(
                         `name`="df2", 
-                        `type`="number", 
+                        `type`="integer", 
                         `title`="df2"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "dep",
+                    "factors",
+                    "covs")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="multiple",
+                title="Multiple model",
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `type`="text", 
+                        `title`="Predictors"),
+                    list(
+                        `name`="b", 
+                        `type`="number", 
+                        `title`="Coef"),
+                    list(
+                        `name`="se", 
+                        `type`="number", 
+                        `title`="SE"),
+                    list(
+                        `name`="t", 
+                        `type`="number", 
+                        `title`="t"),
+                    list(
+                        `name`="df", 
+                        `type`="integer", 
+                        `title`="df"),
                     list(
                         `name`="p", 
                         `title`="p", 
@@ -189,6 +224,7 @@ ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

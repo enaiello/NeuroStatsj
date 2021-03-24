@@ -36,6 +36,8 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             # preparing the table like this prevents jamovi to squish and redraw the table every time
             # something is updated in the UI 
+            # the second table we defined in .r.yaml is `multiple`. We do not prepare it because we do not
+            # know in advance how many rows will need
             
         },
         .run = function() {
@@ -69,16 +71,41 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # I prepared a function .estimate_univariate() in private$ to estimate the model
             # and return the line of results required
             i<-0
+            signif<-list()
             for (cov in covs) {
                 for (tran in trans) {
                     i<-i+1
                     results<-private$.estimate_univariate(cov,tran)
-                    mark(results)
+                    ### we need to know which is signiicant for later on
+                    if (results$p<.05)
+                        signif[[length(signif)+1]]<-c(cov,tran)
+                    ### fill the table
                     aTable$setRow(rowKey=i,results)
                 }
             }
+         
+            ######### prepare the full model #####
+            if (self$options$method=="univariate") {
+                model_results<-private$.estimate_full_univariate(signif)
+            } else
+                model_results<-private$.estimate_full_best()
             
-        },
+            ### model_results is of class summary.lm, so we can take all the info we need
+            mycoeffs<-as.data.frame(model_results$coefficients)
+            names(mycoeffs)<-c("b","se","t","p")
+            ## we add the df
+            mycoeffs$df<-model_results$fstatistic[[3]]
+            ## and the labels
+            ## get the table
+            aTable<-self$results$multiple
+            mycoeffs$term<-row.names(mycoeffs)
+            for (i in 1:nrow(mycoeffs))
+                aTable$addRow(rowKey=i,mycoeffs[i,])
+            ## Here we add some info in footnote
+            
+            aTable$setNote("r2", paste("The R-squared is",round(model_results$r.squared,digits = 3))
+            
+                },
         .cleandata=function() {
             ### here we check the data, remove missing, and change variables if necessary
         },
@@ -88,7 +115,6 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             dep<-self$options$dep
             ## prepare the formula
             info<-TINFO[[tran]]
-            mark(info)
             termGood<-gsub("_._VAR_._",term,info$template,fixed=TRUE)
             lin<-"1"
             if (info$require=="linear")
@@ -105,7 +131,23 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             p<-pf(ftest[[1]], ftest[[2]], ftest[[3]], lower.tail = FALSE)
             results<-list(b=b,r2=r2,ftest=ftest[[1]],df1=ftest[[2]],df2=ftest[[3]],p=p)
             results
+        },
+        .estimate_full_univariate=function(terms) {
+            
+            ### composte the formula ####
+            ### first we get the terms ###
+            myterms<-lapply(terms,function(term) {
+                info<-TINFO[[term[[2]]]]
+                gsub("_._VAR_._",term,info$template,fixed=TRUE)
+            })
+            form<-paste(self$options$dep,"~",paste(myterms,collapse = "+"))
+            mod<-lm(form,self$data)
+            sumry<-summary(mod)
+            sumry
+
         }
+        
+        
         
         
         )
