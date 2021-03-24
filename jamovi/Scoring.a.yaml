@@ -51,6 +51,8 @@ options:
       # do not use name: with spaces or other strange charcters
       # title: can be anything a computer would read, so be relax about them
       options:
+          - name: linear
+            title:   Linear
           - name: quadratic
             title:   Quadratic
           - name: cubic
@@ -61,12 +63,11 @@ options:
             title: Logarithm base 10
           - name: sqrt
             title: Square root
-          - name: Square root
-            title: sqrt
           - name: reciprocal
             title: Reciprocal (1/y)
 ## the default directive decides which options is automatically selected at start up            
       default:
+          - linear
           - quadratic
           - cubic
           - log
@@ -106,7 +107,7 @@ options:
           title: Best univariate fitting
         - name: best
           title: Best fitting combination
-      default: best
+      default: univariate
       description:
           R: >
             Update this when R package is to be dealt with

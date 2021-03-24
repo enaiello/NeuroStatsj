@@ -10,6 +10,7 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             factors = NULL,
             covs = NULL,
             covsTransformations = list(
+                "linear",
                 "quadratic",
                 "cubic",
                 "log",
@@ -18,7 +19,7 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "equivalent",
                 "standardized",
                 "percent"),
-            method = "best", ...) {
+            method = "univariate", ...) {
 
             super$initialize(
                 package="NeuroStatsj",
@@ -49,14 +50,15 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "covsTransformations",
                 covsTransformations,
                 options=list(
+                    "linear",
                     "quadratic",
                     "cubic",
                     "log",
                     "log10",
                     "sqrt",
-                    "Square root",
                     "reciprocal"),
                 default=list(
+                    "linear",
                     "quadratic",
                     "cubic",
                     "log",
@@ -78,7 +80,7 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "univariate",
                     "best"),
-                default="best")
+                default="univariate")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..factors)
@@ -202,6 +204,7 @@ Scoring <- function(
     factors,
     covs = NULL,
     covsTransformations = list(
+                "linear",
                 "quadratic",
                 "cubic",
                 "log",
@@ -210,7 +213,7 @@ Scoring <- function(
                 "equivalent",
                 "standardized",
                 "percent"),
-    method = "best") {
+    method = "univariate") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("Scoring requires jmvcore to be installed (restart may be required)")

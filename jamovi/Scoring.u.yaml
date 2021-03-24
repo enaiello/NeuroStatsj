@@ -31,12 +31,16 @@ children:
     label: Continous predictors
     collapsed: true
     stretchFactor: 1
-    style: inline # we want the children blocks to be side by side
+    style: inline
     children:
       - type: Label
         label: Transformations
         name: covsTransformations
         children:
+          - name: covsTransformations_linear
+            type: CheckBox
+            optionName: covsTransformations
+            optionPart: linear
           - name: covsTransformations_quadratic
             type: CheckBox
             optionName: covsTransformations
@@ -57,10 +61,6 @@ children:
             type: CheckBox
             optionName: covsTransformations
             optionPart: sqrt
-          - name: covsTransformations_Square root
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: Square root
           - name: covsTransformations_reciprocal
             type: CheckBox
             optionName: covsTransformations
@@ -68,15 +68,14 @@ children:
       - type: Label
         label: Method
         children:
-              - type: RadioButton
-                name: method_best
-                optionName: method
-                optionPart: best
-              - type: RadioButton
-                name: method_univariate
-                optionName: method
-                optionPart: univariate
-                
+          - type: RadioButton
+            name: method_best
+            optionName: method
+            optionPart: best
+          - type: RadioButton
+            name: method_univariate
+            optionName: method
+            optionPart: univariate
   - type: CollapseBox
     label: Scoring
     collapsed: true
