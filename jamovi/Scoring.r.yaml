@@ -1,0 +1,39 @@
+---
+name:  Scoring
+title: Scoring
+jrs:   '1.1'
+
+items:
+  - name: univariate
+    title: Univariate effects
+    type: Table
+    columns:
+       - name: term
+         type: text
+         title: "Predictors"
+       - name: b
+         type: number
+         title: "Coef"
+       - name: r2
+         type: number
+         title: R²
+       - name: ftest
+         type: number
+         title: F
+       - name: df1
+         type: number
+         title: df1
+       - name: df2
+         type: number
+         title: df2
+       - name: p
+         title: p
+         type: number
+         format: zto,pvalue
+
+    clearWith:
+        - dep
+        - factors
+        - covs
+
+...

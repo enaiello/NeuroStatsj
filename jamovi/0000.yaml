@@ -1,0 +1,24 @@
+---
+title: Useful Stats for Neuropsychologits
+name: NeuroStatsj
+version: 0.0.1
+jms: '1.0'
+authors:
+  - Nicolò Aiello
+  - Marcello Gallucci
+maintainer: Nicolò Aiello <yourself@somewhere.net>
+date: '2021-03-15'
+type: R
+description: >-
+  More about what it does (maybe more than one line) Use four spaces when
+  indenting paragraphs within the Description.
+analyses:
+  - title: Scoring
+    name: Scoring
+    ns: NeuroStatsj
+    menuGroup: NeuroStatsj
+    menuTitle: Scoring
+usesNative: true
+minApp: 1.0.8
+
+...

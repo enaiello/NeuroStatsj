@@ -1,0 +1,116 @@
+---
+name:  Scoring
+title: Scoring
+menuGroup: NeuroStatsj
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Row Score
+      type: Variable
+      description:
+          R: >
+            Update this when R package is to be dealt with
+
+    - name: factors
+      title: Categorical Pretictors
+      type: Variables
+      suggested:
+         - nominal
+      permitted:
+        - factor
+      description:
+          R: >
+            Update this when R package is to be dealt with
+        
+    - name: covs
+      title: Continuous Pretictors
+      type: Variables
+      default:
+      suggested:
+        - continuous
+        - ordinal
+      permitted:
+        - numeric
+      description:
+          R: >
+            Update this when R package is to be dealt with
+
+
+
+
+# this is an example of options that will come to R as list of list. This is usefull when you want
+# to have options that can be independently flagged in the UI
+    - name: covsTransformations
+      title: Transformations
+      type: NMXList
+      # do not use name: with spaces or other strange charcters
+      # title: can be anything a computer would read, so be relax about them
+      options:
+          - name: quadratic
+            title:   Quadratic
+          - name: cubic
+            title: Cubic
+          - name: log
+            title: Natural Logarithm
+          - name: log10
+            title: Logarithm base 10
+          - name: sqrt
+            title: Square root
+          - name: Square root
+            title: sqrt
+          - name: reciprocal
+            title: Reciprocal (1/y)
+## the default directive decides which options is automatically selected at start up            
+      default:
+          - quadratic
+          - cubic
+          - log
+          - sqrt
+      description:
+          R: >
+            Update this when R package is to be dealt with
+
+
+    - name: scoreTypes
+      title: Scoring methods
+      type: NMXList
+      # do not use name: with spaces or other strange charcters
+      # title: can be anything a computer would read, so be relax about them
+      options:
+          - name: equivalent
+            title:  Equivalent Scores
+          - name: standardized
+            title: Z-scores
+          - name: percent
+            title: Percentiles
+## the default directive decides which options is automatically selected at start up            
+      default:
+          - equivalent
+          - standardized
+          - percent
+      description:
+          R: >
+            Update this when R package is to be dealt with
+
+
+    - name: method
+      title: Selection method
+      type: List
+      options:
+        - name: univariate
+          title: Best univariate fitting
+        - name: best
+          title: Best fitting combination
+      default: best
+      description:
+          R: >
+            Update this when R package is to be dealt with
+
+...
+
+# you need the three dots at the end
