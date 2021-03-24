@@ -110,7 +110,8 @@ ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         univariate = function() private$.items[["univariate"]],
-        multiple = function() private$.items[["multiple"]]),
+        multiple = function() private$.items[["multiple"]],
+        zscores = function() private$.items[["zscores"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -189,6 +190,16 @@ ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "dep",
                     "factors",
+                    "covs")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="zscores",
+                title="Z-Scores",
+                varTitle="`Z_${ dep }`",
+                varDescription="Standardized scores",
+                clearWith=list(
+                    "dep",
+                    "factors",
                     "covs")))}))
 
 ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -199,7 +210,7 @@ ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "NeuroStatsj",
                 name = "Scoring",
-                version = c(1,0,0),
+                version = c(0,0,1),
                 options = options,
                 results = ScoringResults$new(options=options),
                 data = data,
@@ -225,6 +236,7 @@ ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$zscores} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

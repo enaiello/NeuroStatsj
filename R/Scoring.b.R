@@ -5,6 +5,7 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "ScoringClass",
     inherit = ScoringBase,
     private = list(
+        .data=NULL,
         .init =function() {
             ginfo("init")
             # init is run at the beginning with empty data (definitions of variables are present)
@@ -42,6 +43,8 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         .run = function() {
             ginfo("run")
+            # clean the data and store them in private$.data
+            private$.cleandata()
             # collect the outcome (options are defined in .a.yaml)
             dep<-self$options$dep
             
@@ -89,25 +92,41 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 model_results<-private$.estimate_full_univariate(signif)
             } else
                 model_results<-private$.estimate_full_best()
-            
+            mark(class(model_results))
             ### model_results is of class summary.lm, so we can take all the info we need
-            mycoeffs<-as.data.frame(model_results$coefficients)
-            names(mycoeffs)<-c("b","se","t","p")
+            if ("summary.lm" %in% class(model_results)) {
+                mycoeffs<-as.data.frame(model_results$coefficients)
+                names(mycoeffs)<-c("b","se","t","p")
             ## we add the df
-            mycoeffs$df<-model_results$fstatistic[[3]]
+                mycoeffs$df<-model_results$fstatistic[[3]]
             ## and the labels
             ## get the table
-            aTable<-self$results$multiple
-            mycoeffs$term<-row.names(mycoeffs)
-            for (i in 1:nrow(mycoeffs))
-                aTable$addRow(rowKey=i,mycoeffs[i,])
+                aTable<-self$results$multiple
+                mycoeffs$term<-row.names(mycoeffs)
+                for (i in 1:nrow(mycoeffs))
+                        aTable$addRow(rowKey=i,mycoeffs[i,])
             ## Here we add some info in footnote
-            
-            aTable$setNote("r2", paste("The R-squared is",round(model_results$r.squared,digits = 3))
-            
+                aTable$setNote("r2", paste("The R-squared is",round(model_results$r.squared,digits = 3)))
+                
+                
+            #### saving scores back to datasheet: as an example I save the z-scores####
+                
+                if (("standardized" %in% self$options$scoreTypes) & self$results$zscores$isNotFilled()) {
+                    ginfo("Saving z-scores")
+                    zscores<-as.numeric(scale(private$.data[,dep]))
+                    # we need the rownames in case there are missing in the datasheet
+                    zscores <- data.frame(zscores=zscores, row.names=rownames(private$.data))
+                    self$results$zscores$setValues(zscores)
+                }
+                
+            }        
                 },
         .cleandata=function() {
             ### here we check the data, remove missing, and change variables if necessary
+            ### here you want to check if the transformations can be applied, if factors are
+            ### coded well, etc.
+            ### for now, it just remove the missing
+            private$.data<-jmvcore::naOmit(self$data)
         },
         .estimate_univariate=function(term,tran) {
             ## the info about the transformations are in the constant list
@@ -121,7 +140,7 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   lin<-term
             form<-as.formula(paste(dep,"~",lin,"+",termGood))
             ### do the estimation with lm
-            mod<-lm(form,data=self$data)
+            mod<-lm(form,data=private$.data)
             # collect the info we need. Names of the list should correspond to the columns of the
             # table defined in .r.yaml
             b<-mod$coefficients[[length(mod$coefficients)]]
@@ -133,7 +152,9 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             results
         },
         .estimate_full_univariate=function(terms) {
-            
+            ## check is something comes out from univarate test
+            if (!is.something(terms))
+                 return(FALSE)
             ### composte the formula ####
             ### first we get the terms ###
             myterms<-lapply(terms,function(term) {
@@ -141,7 +162,7 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 gsub("_._VAR_._",term,info$template,fixed=TRUE)
             })
             form<-paste(self$options$dep,"~",paste(myterms,collapse = "+"))
-            mod<-lm(form,self$data)
+            mod<-lm(form,private$.data)
             sumry<-summary(mod)
             sumry
 

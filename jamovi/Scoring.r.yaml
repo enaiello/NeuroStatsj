@@ -65,4 +65,15 @@ items:
         - factors
         - covs
 
+### this part is for saving the estimated scores back to the datasheet. It's a new mechanism in jamovi, so I'm not sure
+  - name: zscores
+    title: Z-Scores
+    type: Output
+    varTitle: '`Z_${ dep }`'
+    varDescription: Standardized scores
+    clearWith:
+        - dep
+        - factors
+        - covs
+
 ...

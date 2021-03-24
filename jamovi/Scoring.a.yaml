@@ -2,7 +2,7 @@
 name:  Scoring
 title: Scoring
 menuGroup: NeuroStatsj
-version: '1.0.0'
+version: '0.0.1'
 jas: '1.2'
 
 options:
@@ -10,7 +10,7 @@ options:
       type: Data
 
     - name: dep
-      title: Row Score
+      title: Raw Score
       type: Variable
       description:
           R: >
