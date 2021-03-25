@@ -97,3 +97,8 @@ children:
             type: CheckBox
             optionName: scoreTypes
             optionPart: percent
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Output
+        name: zscores

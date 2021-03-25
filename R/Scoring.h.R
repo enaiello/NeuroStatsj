@@ -81,6 +81,8 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "univariate",
                     "best"),
                 default="univariate")
+            private$..zscores <- jmvcore::OptionOutput$new(
+                "zscores")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..factors)
@@ -88,6 +90,7 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..covsTransformations)
             self$.addOption(private$..scoreTypes)
             self$.addOption(private$..method)
+            self$.addOption(private$..zscores)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -95,14 +98,16 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         covs = function() private$..covs$value,
         covsTransformations = function() private$..covsTransformations$value,
         scoreTypes = function() private$..scoreTypes$value,
-        method = function() private$..method$value),
+        method = function() private$..method$value,
+        zscores = function() private$..zscores$value),
     private = list(
         ..dep = NA,
         ..factors = NA,
         ..covs = NA,
         ..covsTransformations = NA,
         ..scoreTypes = NA,
-        ..method = NA)
+        ..method = NA,
+        ..zscores = NA)
 )
 
 ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

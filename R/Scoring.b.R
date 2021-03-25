@@ -20,7 +20,9 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # collect the table (defined in .r.yaml)
             aTable<-self$results$univariate
             # collect the continuous variables (options are defined in .a.yaml)
+            mark("ciao",self$options$covs)
             covs<-self$options$covs
+            
             ## I use mark to see in console what I got 
             # then I collect the transformations
             trans<-self$options$covsTransformations
@@ -92,7 +94,7 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 model_results<-private$.estimate_full_univariate(signif)
             } else
                 model_results<-private$.estimate_full_best()
-            mark(class(model_results))
+            
             ### model_results is of class summary.lm, so we can take all the info we need
             if ("summary.lm" %in% class(model_results)) {
                 mycoeffs<-as.data.frame(model_results$coefficients)
@@ -115,8 +117,8 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ginfo("Saving z-scores")
                     zscores<-as.numeric(scale(private$.data[,dep]))
                     # we need the rownames in case there are missing in the datasheet
-                    zscores <- data.frame(zscores=zscores, row.names=rownames(private$.data))
-                    self$results$zscores$setValues(zscores)
+                    zscoresdf <- data.frame(zscores=zscores, row.names=rownames(private$.data))
+                    self$results$zscores$setValues(zscoresdf)
                 }
                 
             }        
@@ -140,7 +142,7 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   lin<-term
             form<-as.formula(paste(dep,"~",lin,"+",termGood))
             ### do the estimation with lm
-            mod<-lm(form,data=private$.data)
+            mod<-stats::lm(form,data=private$.data)
             # collect the info we need. Names of the list should correspond to the columns of the
             # table defined in .r.yaml
             b<-mod$coefficients[[length(mod$coefficients)]]
@@ -159,7 +161,7 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### first we get the terms ###
             myterms<-lapply(terms,function(term) {
                 info<-TINFO[[term[[2]]]]
-                gsub("_._VAR_._",term,info$template,fixed=TRUE)
+                gsub("_._VAR_._",term[[1]],info$template,fixed=TRUE)
             })
             form<-paste(self$options$dep,"~",paste(myterms,collapse = "+"))
             mod<-lm(form,private$.data)

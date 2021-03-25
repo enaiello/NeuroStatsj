@@ -112,6 +112,9 @@ options:
           R: >
             Update this when R package is to be dealt with
 
+    - name: zscores
+      title: Z-Scores
+      type: Output
 ...
 
 # you need the three dots at the end
