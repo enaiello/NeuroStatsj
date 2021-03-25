@@ -77,28 +77,17 @@ children:
             optionName: method
             optionPart: univariate
   - type: CollapseBox
-    label: Scoring
+    label: Save scores
     collapsed: true
     stretchFactor: 1
+    style: inline
     children:
-      - type: Label
-        label: Scoring Types
-        name: scoreTypes
-        children:
-          - name: scoreTypes_equivalent
-            type: CheckBox
-            optionName: scoreTypes
-            optionPart: equivalent
-          - name: scoreTypes_standardized
-            type: CheckBox
-            optionName: scoreTypes
-            optionPart: standardized
-          - name: scoreTypes_percent
-            type: CheckBox
-            optionName: scoreTypes
-            optionPart: percent
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Output
-        name: zscores
+          - type: LayoutBox
+            margin: large
+            children:
+                  - type: Output
+                    name: zscores
+                  - type: Output
+                    name: equivalent
+                  - type: Output
+                    name: percent

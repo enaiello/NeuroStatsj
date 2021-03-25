@@ -76,4 +76,23 @@ items:
         - factors
         - covs
 
+  - name: equivalent
+    title: Equivalent Scores
+    type: Output
+    varTitle: '`ES_${ dep }`'
+    varDescription: Standardized scores
+    clearWith:
+        - dep
+        - factors
+        - covs
+  - name: percent
+    title: Percentile
+    type: Output
+    varTitle: '`Per_${ dep }`'
+    varDescription: Standardized scores
+    clearWith:
+        - dep
+        - factors
+        - covs
+
 ...

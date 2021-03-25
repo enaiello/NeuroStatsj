@@ -77,27 +77,6 @@ options:
             Update this when R package is to be dealt with
 
 
-    - name: scoreTypes
-      title: Scoring methods
-      type: NMXList
-      # do not use name: with spaces or other strange charcters
-      # title: can be anything a computer would read, so be relax about them
-      options:
-          - name: equivalent
-            title:  Equivalent Scores
-          - name: standardized
-            title: Z-scores
-          - name: percent
-            title: Percentiles
-## the default directive decides which options is automatically selected at start up            
-      default:
-          - equivalent
-          - standardized
-          - percent
-      description:
-          R: >
-            Update this when R package is to be dealt with
-
 
     - name: method
       title: Selection method
@@ -112,9 +91,19 @@ options:
           R: >
             Update this when R package is to be dealt with
 
+
     - name: zscores
-      title: Z-Scores
-      type: Output
+      title: Z-scores
+      type: Output            
+
+    - name: equivalent
+      title:  Equivalent Scores
+      type: Output            
+
+    - name: percent
+      title: Percentiles
+      type: Output            
+
 ...
 
 # you need the three dots at the end
