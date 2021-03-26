@@ -4,6 +4,7 @@ title: Scoring
 menuGroup: NeuroStatsj
 version: '0.0.1'
 jas: '1.2'
+completeWhenFilled: false
 
 options:
     - name: data
@@ -12,6 +13,12 @@ options:
     - name: dep
       title: Raw Score
       type: Variable
+      default:
+      suggested:
+          - continuous
+          - ordinal
+      permitted:
+          - numeric
       description:
           R: >
             Update this when R package is to be dealt with
@@ -91,19 +98,10 @@ options:
           R: >
             Update this when R package is to be dealt with
 
-
     - name: zscores
       title: Z-scores
-      type: Output            
+      type: Output   
 
-    - name: equivalent
-      title:  Equivalent Scores
-      type: Output            
-
-    - name: percent
-      title: Percentiles
-      type: Output            
 
 ...
 
-# you need the three dots at the end

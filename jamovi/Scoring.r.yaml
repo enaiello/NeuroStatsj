@@ -59,40 +59,15 @@ items:
          title: p
          type: number
          format: zto,pvalue
-
     clearWith:
         - dep
         - factors
         - covs
 
-### this part is for saving the estimated scores back to the datasheet. It's a new mechanism in jamovi, so I'm not sure
   - name: zscores
-    title: Z-Scores
-    type: Output
+    title: Z-scores
+    type: Output            
     varTitle: '`Z_${ dep }`'
-    varDescription: Standardized scores
-    clearWith:
-        - dep
-        - factors
-        - covs
-
-  - name: equivalent
-    title: Equivalent Scores
-    type: Output
-    varTitle: '`ES_${ dep }`'
-    varDescription: Standardized scores
-    clearWith:
-        - dep
-        - factors
-        - covs
-  - name: percent
-    title: Percentile
-    type: Output
-    varTitle: '`Per_${ dep }`'
-    varDescription: Standardized scores
-    clearWith:
-        - dep
-        - factors
-        - covs
+    varDescription: Z scores
 
 ...

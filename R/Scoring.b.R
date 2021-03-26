@@ -66,7 +66,6 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # we stop any work if no predictor is defined
             if (!is.something(c(factors,covs)))
                 return()
-            mark()
             # as an example, we fill the "univariate table" with lm() results
             # collect the table (defined in .init())
             aTable<-self$results$univariate
@@ -109,14 +108,14 @@ ScoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ## Here we add some info in footnote
                 aTable$setNote("r2", paste("The R-squared is",round(model_results$r.squared,digits = 3)))
                 
-                mark(names(self$results$zscores))
             #### saving scores back to datasheet: as an example I save the z-scores####
-                if (self$options$zscore && self$results$zscores$isNotFilled()) {
-                    ginfo("Saving z-scores")
-                    zscores<-as.numeric(scale(private$.data[,dep]))
-                    # we need the rownames in case there are missing in the datasheet
-                    zscoresdf <- data.frame(zscores=zscores, row.names=rownames(private$.data))
-                    self$results$zscores$setValues(zscoresdf)
+                mark("zopt",self$options$zscores)
+                 if (self$options$zscores) {
+                     ginfo("Saving z-scores")
+                     zscores<-as.numeric(scale(private$.data[,dep]))
+                # we need the rownames in case there are missing in the datasheet
+                     zscoresdf <- data.frame(zscores=zscores, row.names=rownames(private$.data))
+                     self$results$zscores$setValues(zscoresdf)
                 }
                 
             }        

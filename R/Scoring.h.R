@@ -25,7 +25,13 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..dep <- jmvcore::OptionVariable$new(
                 "dep",
-                dep)
+                dep,
+                default=NULL,
+                suggested=list(
+                    "continuous",
+                    "ordinal"),
+                permitted=list(
+                    "numeric"))
             private$..factors <- jmvcore::OptionVariables$new(
                 "factors",
                 factors,
@@ -68,10 +74,6 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default="univariate")
             private$..zscores <- jmvcore::OptionOutput$new(
                 "zscores")
-            private$..equivalent <- jmvcore::OptionOutput$new(
-                "equivalent")
-            private$..percent <- jmvcore::OptionOutput$new(
-                "percent")
 
             self$.addOption(private$..dep)
             self$.addOption(private$..factors)
@@ -79,8 +81,6 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..covsTransformations)
             self$.addOption(private$..method)
             self$.addOption(private$..zscores)
-            self$.addOption(private$..equivalent)
-            self$.addOption(private$..percent)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -88,18 +88,14 @@ ScoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         covs = function() private$..covs$value,
         covsTransformations = function() private$..covsTransformations$value,
         method = function() private$..method$value,
-        zscores = function() private$..zscores$value,
-        equivalent = function() private$..equivalent$value,
-        percent = function() private$..percent$value),
+        zscores = function() private$..zscores$value),
     private = list(
         ..dep = NA,
         ..factors = NA,
         ..covs = NA,
         ..covsTransformations = NA,
         ..method = NA,
-        ..zscores = NA,
-        ..equivalent = NA,
-        ..percent = NA)
+        ..zscores = NA)
 )
 
 ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -108,9 +104,7 @@ ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         univariate = function() private$.items[["univariate"]],
         multiple = function() private$.items[["multiple"]],
-        zscores = function() private$.items[["zscores"]],
-        equivalent = function() private$.items[["equivalent"]],
-        percent = function() private$.items[["percent"]]),
+        zscores = function() private$.items[["zscores"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -193,33 +187,9 @@ ScoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Output$new(
                 options=options,
                 name="zscores",
-                title="Z-Scores",
+                title="Z-scores",
                 varTitle="`Z_${ dep }`",
-                varDescription="Standardized scores",
-                clearWith=list(
-                    "dep",
-                    "factors",
-                    "covs")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="equivalent",
-                title="Equivalent Scores",
-                varTitle="`ES_${ dep }`",
-                varDescription="Standardized scores",
-                clearWith=list(
-                    "dep",
-                    "factors",
-                    "covs")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="percent",
-                title="Percentile",
-                varTitle="`Per_${ dep }`",
-                varDescription="Standardized scores",
-                clearWith=list(
-                    "dep",
-                    "factors",
-                    "covs")))}))
+                varDescription="Z scores"))}))
 
 ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ScoringBase",
@@ -255,8 +225,6 @@ ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$zscores} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$equivalent} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$percent} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -268,7 +236,7 @@ ScoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 Scoring <- function(
     data,
-    dep,
+    dep = NULL,
     factors,
     covs = NULL,
     covsTransformations = list(

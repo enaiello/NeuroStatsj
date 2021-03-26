@@ -1,7 +1,6 @@
 title: Scoring
 name: Scoring
-jus: '3.0'
-stage: 0
+jus: '2.0'
 compilerMode: tame
 children:
   - type: VariableSupplier
@@ -76,18 +75,15 @@ children:
             name: method_univariate
             optionName: method
             optionPart: univariate
+
   - type: CollapseBox
-    label: Save scores
+    label: Continous predictors
     collapsed: true
     stretchFactor: 1
     style: inline
     children:
-          - type: LayoutBox
-            margin: large
-            children:
-                  - type: Output
-                    name: zscores
-                  - type: Output
-                    name: equivalent
-                  - type: Output
-                    name: percent
+     - type: LayoutBox
+       margin: large
+       children:
+            - type: Output
+              name: zscores
