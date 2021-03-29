@@ -1,7 +1,7 @@
 # Here we put very general functions, usefull over and beyond this package
 
 ginfo <- function(what = NULL, obj = NULL) {
-    if (NSj_INFO) {
+    if (j_INFO) {
         if (!is.null(what)) 
             print(what)
         if (!is.null(obj)) {
@@ -12,7 +12,7 @@ ginfo <- function(what = NULL, obj = NULL) {
 }
 
 mark <- function(what = NULL, obj = NULL) {
-    if (NSj_DEBUG) {
+    if (j_DEBUG) {
         if (!is.null(what)) 
             print(what) else print("you got here")
 

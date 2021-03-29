@@ -14,10 +14,12 @@ description: >-
   indenting paragraphs within the Description.
 analyses:
   - title: Scoring
-    name: Scoring
+    name: scoring
     ns: NeuroStatsj
     menuGroup: NeuroStatsj
     menuTitle: Scoring
+    description: |
+      Something here
 usesNative: true
 minApp: 1.0.8
 

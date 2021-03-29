@@ -1,6 +1,6 @@
 ### these controls debug in console
-NSj_DEBUG=T
-NSj_INFO=T
+j_DEBUG=T
+j_INFO=T
 
 ## this defines how to transform variables. The name should correspond to `covTransformation` names defined in .a.yaml
 TINFO<-list()

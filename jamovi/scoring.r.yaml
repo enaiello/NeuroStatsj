@@ -1,0 +1,74 @@
+---
+name:  scoring
+title: Scoring
+jrs: '1.0'
+
+
+items:
+  - name: univariate
+    title: Univariate effects
+    type: Table
+    columns:
+       - name: term
+         type: text
+         title: "Predictors"
+       - name: b
+         type: number
+         title: "Coef"
+       - name: r2
+         type: number
+         title: R²
+       - name: ftest
+         type: number
+         title: F
+       - name: df1
+         type: integer
+         title: df1
+       - name: df2
+         type: integer
+         title: df2
+       - name: p
+         title: p
+         type: number
+         format: zto,pvalue
+
+    clearWith:
+        - dep
+        - factors
+        - covs
+
+  - name: multiple
+    title: Multiple model
+    type: Table
+    columns:
+       - name: term
+         type: text
+         title: "Predictors"
+       - name: b
+         type: number
+         title: "Coef"
+       - name: se
+         type: number
+         title: SE
+       - name: t
+         type: number
+         title: t
+       - name: df
+         type: integer
+         title: df
+       - name: p
+         title: p
+         type: number
+         format: zto,pvalue
+    clearWith:
+        - dep
+        - factors
+        - covs
+
+  - name: zscores
+    title: Z-scores
+    type: Output            
+    varTitle: '`Z_${ dep }`'
+    varDescription: Z scores
+
+
