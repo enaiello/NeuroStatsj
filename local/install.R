@@ -6,7 +6,7 @@ jmvtools::check()
 home<-"flatpak"
 jmvtools::check(home=home)
 
-jmvScaffold::copy_files()
+#jmvScaffold::copy_files()
 #jmvScaffold::install_module_full("GAMLj3")
 
 

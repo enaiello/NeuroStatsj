@@ -1,15 +1,23 @@
-### these controls debug in console
-j_DEBUG=T
-j_INFO=T
 
-## this defines how to transform variables. The name should correspond to `covTransformation` names defined in .a.yaml
-TINFO<-list()
-TINFO[["linear"]]<-list(template="_._VAR_._",require="linear")
+### these are definitions of functions and translations
+TRANSFUN<-list()
+TRANSFUN[["lin"]]<-list(id="lin",name="Linear",fun=identity,label=function(x) sprintf("%s",x))
+TRANSFUN[["ln"]]<-list(id="ln",name="LN",fun=function(x) log(x),label=function(x) sprintf("LN(%s)",x))
+TRANSFUN[["log10"]]<-list(id="log10",name="Log",fun=function(x) log10(x),label=function(x) sprintf("LN(%s)",x))
+TRANSFUN[["log100"]]<-list(id="log100",name="Log(100-x)",fun=function(x) log10(100-x),label=function(x) sprintf("LOG10(100-%s)",x))
+TRANSFUN[["rec"]]<-list(id="rec",name="Reciprocal",fun=function(x) 1/x,label=function(x) sprintf("1/%s",x))
+TRANSFUN[["quad"]]<-list(id="quad",name="Quadratic",fun=function(x) x^2,label=function(x) sprintf("%s\u00B2",x))
+TRANSFUN[["cub"]]<-list(id="cub",name="Cubic",fun=function(x) x^3,label=function(x) sprintf("%s\u00B3",x))
+TRANSFUN[["sqrt"]]<-list(id="sqrt",name="Squared Root",fun=function(x) sqrt(x),label=function(x) sprintf("%s\u221A",x))
 
-TINFO[["quadratic"]]<-list(template="I(_._VAR_._^2)",require=FALSE)
-TINFO[["cubic"]]<-list(template="I(_._VAR_._^3)",require=FALSE)
-TINFO[["sqrt"]]<-list(template="I(_._VAR_._^.5)",require=FALSE)
-TINFO[["log"]]<-list(template="I(log(_._VAR_._))",require=FALSE)
-TINFO[["log10"]]<-list(template="I(log10(_._VAR_._))",require=FALSE)
-TINFO[["reciprocal"]]<-list(template="I(1/_._VAR_._)",require=FALSE)
+TRANSFUN[["auto"]]<-list(id="auto",name="Auto",label="Automatic")
 
+
+MODEL_TYPE<-list()
+MODEL_TYPE[["lm"]]<-list(id="lm",name="Linear",fun=stats::lm)
+MODEL_TYPE[["nb"]]<-list(id="nb",name="Negative Binobial",fun=MASS::neg.bin)
+
+METHOD_LABEL<-list()
+METHOD_LABEL[["user"]]<-"User"
+METHOD_LABEL[["step"]]<-"Step-wise"
+METHOD_LABEL[["significant"]]<-"Significance"

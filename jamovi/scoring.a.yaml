@@ -17,6 +17,7 @@ options:
         type: Data
         description:
             R: the data as a data frame
+            
     -   name: dep
         title: Raw Score
         type: Variable
@@ -73,7 +74,7 @@ options:
         options:
             -   name: lin
                 title: Linear
-            -   name: log
+            -   name: ln
                 title: Natural Logarithm
             -   name: log10
                 title: Base 10 Log
@@ -90,7 +91,7 @@ options:
 
         default:
             - lin
-            - log
+            - ln
             - log100
             - rec
         description:
@@ -106,7 +107,7 @@ options:
         title: Selection method
         type: List
         options:
-            -   name: univariate
+            -   name: significant
                 title: Keep significant
             -   name: step
                 title: Stepwise
@@ -189,3 +190,12 @@ options:
         title: Raw 
         type: Bool
         default: false
+
+    -   name: .caller
+        type: String
+        default: scoring
+        hidden: true
+    -   name: .interface
+        type: String
+        default: jamovi
+        hidden: true

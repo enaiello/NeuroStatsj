@@ -12,7 +12,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             model_type = "lm",
             covsTransformations = list(
                 "lin",
-                "log",
+                "ln",
                 "log100",
                 "rec"),
             select = TRUE,
@@ -25,7 +25,9 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             perc = TRUE,
             perc_type = "eby5",
             score_adjust = TRUE,
-            score_raw = FALSE, ...) {
+            score_raw = FALSE,
+            .caller = "scoring",
+            .interface = "jamovi", ...) {
 
             super$initialize(
                 package="NeuroStatsj",
@@ -72,7 +74,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 covsTransformations,
                 options=list(
                     "lin",
-                    "log",
+                    "ln",
                     "log10",
                     "log100",
                     "rec",
@@ -81,7 +83,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cub"),
                 default=list(
                     "lin",
-                    "log",
+                    "ln",
                     "log100",
                     "rec"))
             private$..select <- jmvcore::OptionBool$new(
@@ -92,7 +94,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "method",
                 method,
                 options=list(
-                    "univariate",
+                    "significant",
                     "step"),
                 default="step")
             private$..direction <- jmvcore::OptionList$new(
@@ -163,6 +165,16 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "score_raw",
                 score_raw,
                 default=FALSE)
+            private$...caller <- jmvcore::OptionString$new(
+                ".caller",
+                .caller,
+                default="scoring",
+                hidden=TRUE)
+            private$...interface <- jmvcore::OptionString$new(
+                ".interface",
+                .interface,
+                default="jamovi",
+                hidden=TRUE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..factors)
@@ -180,6 +192,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..perc_type)
             self$.addOption(private$..score_adjust)
             self$.addOption(private$..score_raw)
+            self$.addOption(private$...caller)
+            self$.addOption(private$...interface)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -197,7 +211,9 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         perc = function() private$..perc$value,
         perc_type = function() private$..perc_type$value,
         score_adjust = function() private$..score_adjust$value,
-        score_raw = function() private$..score_raw$value),
+        score_raw = function() private$..score_raw$value,
+        .caller = function() private$...caller$value,
+        .interface = function() private$...interface$value),
     private = list(
         ..dep = NA,
         ..factors = NA,
@@ -214,13 +230,19 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..perc = NA,
         ..perc_type = NA,
         ..score_adjust = NA,
-        ..score_raw = NA)
+        ..score_raw = NA,
+        ...caller = NA,
+        ...interface = NA)
 )
 
 scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "scoringResults",
     inherit = jmvcore::Group,
     active = list(
+        info = function() private$.items[["info"]],
+        extrainfo = function() private$.items[["extrainfo"]],
+        issues = function() private$.items[["issues"]],
+        varstab = function() private$.items[["varstab"]],
         univariate = function() private$.items[["univariate"]],
         multiple = function() private$.items[["multiple"]],
         final = function() private$.items[["final"]]),
@@ -231,6 +253,49 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Scoring")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="info",
+                title="Introduction"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="extrainfo",
+                title="Extra Info",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="issues",
+                title="Issues",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="varstab",
+                title="Variables",
+                columns=list(
+                    list(
+                        `name`="name", 
+                        `type`="text", 
+                        `title`="Name"),
+                    list(
+                        `name`="type", 
+                        `type`="text", 
+                        `title`="Type"),
+                    list(
+                        `name`="forced", 
+                        `type`="text", 
+                        `title`="Transform"),
+                    list(
+                        `name`="method", 
+                        `type`="text", 
+                        `title`="Inclusion"),
+                    list(
+                        `name`="selected", 
+                        `type`="text", 
+                        `title`="Selected"),
+                    list(
+                        `name`="selected_trans", 
+                        `type`="text", 
+                        `title`="Selected Transf."))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="univariate",
@@ -386,8 +451,14 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param perc_type .
 #' @param score_adjust .
 #' @param score_raw .
+#' @param .caller .
+#' @param .interface .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$info} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$extrainfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$issues} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$varstab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
@@ -395,9 +466,9 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$univariate$asDF}
+#' \code{results$varstab$asDF}
 #'
-#' \code{as.data.frame(results$univariate)}
+#' \code{as.data.frame(results$varstab)}
 #'
 #' @export
 scoring <- function(
@@ -408,7 +479,7 @@ scoring <- function(
     model_type = "lm",
     covsTransformations = list(
                 "lin",
-                "log",
+                "ln",
                 "log100",
                 "rec"),
     select = TRUE,
@@ -421,7 +492,9 @@ scoring <- function(
     perc = TRUE,
     perc_type = "eby5",
     score_adjust = TRUE,
-    score_raw = FALSE) {
+    score_raw = FALSE,
+    .caller = "scoring",
+    .interface = "jamovi") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("scoring requires jmvcore to be installed (restart may be required)")
@@ -456,7 +529,9 @@ scoring <- function(
         perc = perc,
         perc_type = perc_type,
         score_adjust = score_adjust,
-        score_raw = score_raw)
+        score_raw = score_raw,
+        .caller = .caller,
+        .interface = .interface)
 
     analysis <- scoringClass$new(
         options = options,

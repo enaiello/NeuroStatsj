@@ -5,17 +5,33 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "scoringClass",
     inherit = scoringBase,
     private = list(
-        .data=NULL,
+        .time = NULL,
+        .ready = FALSE,
+        .smartObjs = list(),
+        .plotter = NULL,
+        .runner = NULL,
         .init =function() {
-            ginfo("init")
-            
+          
+                jinfo(paste("MODULE:  NeuroStatsj #### phase init  ####"))
+                private$.time <- Sys.time()
+                class(private$.results) <- c("scoring", class(private$.results)) ## this is useful in R interface
+
+                ### set up the R6 workhorse class
+                private$.runner <- Runner$new(self)
+                ### univariate table ###
+                aSmartObj <- SmartTable$new(self$results$varstab, private$.runner)
+                ladd(private$.smartObjs) <- aSmartObj
+                ### init all ####
+                for (tab in private$.smartObjs) {
+                    tab$initTable()
+                }
             
         },
         
         .run = function() {
             ginfo("run")
-            private$.data<-jmvcore::naOmit(self$data)
-            
+            private$.runner$run()
+        
             
         },
         .cleandata=function() {

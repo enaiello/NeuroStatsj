@@ -4,7 +4,7 @@ const events = {
          console.log("Updating analysis");
 
     },
-
+    
     covs_changed: function(ui ) {
       
          console.log("covs changed");
@@ -25,7 +25,10 @@ const events = {
 
          console.log("work on included");
 
-        ui.includedSupplier.setValue(utils.valuesToItems(b, FormatDef.term));
+        var facs = utils.clone(ui.factors.value(),[])
+        var combined = b.concat(facs)
+
+        ui.includedSupplier.setValue(utils.valuesToItems(combined, FormatDef.term));
         return
          
 //          var c = utils.clone(ui.includedSupplier.value(), []);
@@ -44,9 +47,22 @@ const events = {
          
 
     },
+    
+    factors_changed: function(ui) {
+      
+      var covs = utils.clone(ui.covs.value(),[])
+      var facs = utils.clone(ui.factors.value(),[])
+      var combined = covs.concat(facs)
+      ui.includedSupplier.setValue(utils.valuesToItems(combined, FormatDef.term));
+    },
+    
     includedSupplier_updated: function(ui) {
+      
       console.log("included supplier updated");
-      ui.includedSupplier.setValue(utils.valuesToItems(utils.clone(ui.covs.value(),[]), FormatDef.term));
+      var covs = utils.clone(ui.covs.value(),[])
+      var facs = utils.clone(ui.factors.value(),[])
+      var combined = covs.concat(facs);
+      ui.includedSupplier.setValue(utils.valuesToItems(combined, FormatDef.term));
 
 
     },
@@ -63,7 +79,6 @@ const events = {
      console.log("included changed"); 
      var included_values=utils.clone(ui.included.value(),[]);
      var ok_values=included_values.filter((v,i,a)=>a.indexOf(v)==i);
-      
      if (included_values.length !== ok_values.length) {
         ui.included.setValue(ok_values);
      }

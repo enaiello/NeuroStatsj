@@ -1,4 +1,4 @@
-title: scoring
+title: Scoring
 name: scoring
 jus: '3.0'
 stage: 0
@@ -9,23 +9,23 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Row Score
+        label: Raw Score
         children:
           - type: VariablesListBox
             name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Dichotomous Pretictors
-        children:
-          - type: VariablesListBox
-            name: factors
-            isTarget: true
-      - type: TargetLayoutBox
         label: Continuous Pretictors
         children:
           - type: VariablesListBox
             name: covs
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Dichotomous Pretictors
+        children:
+          - type: VariablesListBox
+            name: factors
             isTarget: true
   - type: CollapseBox
     label: Model selection
@@ -57,7 +57,6 @@ children:
                 name: model_type_beta
                 optionName: model_type
                 optionPart: beta
-        
           - type: Label
             label: Transformations
             name: covsTransformations
@@ -72,15 +71,10 @@ children:
                     optionName: covsTransformations
                     optionPart: lin
                     enable: (select)
-                  - name: covsTransformations_quad
+                  - name: covsTransformations_ln
                     type: CheckBox
                     optionName: covsTransformations
-                    optionPart: quad
-                    enable: (select)
-                  - name: covsTransformations_log
-                    type: CheckBox
-                    optionName: covsTransformations
-                    optionPart: log
+                    optionPart: ln
                     enable: (select)
                   - name: covsTransformations_rec
                     type: CheckBox
@@ -102,6 +96,10 @@ children:
                     optionName: covsTransformations
                     optionPart: sqrt
                     enable: (select)
+                  - name: covsTransformations_quad
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: quad
                   - name: covsTransformations_cub
                     type: CheckBox
                     optionName: covsTransformations
@@ -111,29 +109,31 @@ children:
             name: model_selection_second
             style: list
             children:
-
-                - type: Label
-                  label: Terms Selection
-                  children:
-                    - type: RadioButton
-                      name: method_step
-                      optionName: method
-                      optionPart: step
-                    - type: RadioButton
-                      name: method_univariate
-                      optionName: method
-                      optionPart: univariate
-                - type: Label
-                  label: Scores direction (worse score)
-                  children:
-                    - type: RadioButton
-                      name: dir_high
-                      optionName: direction
-                      optionPart: high
-                    - type: RadioButton
-                      name: dir_low
-                      optionName: direction
-                      optionPart: low
+              - type: Label
+                label: Terms Selection
+                children:
+                  - type: RadioButton
+                    name: method_step
+                    optionName: method
+                    optionPart: step
+              - type: Label
+                label: Scores direction (worse score)
+                children:
+                  - type: RadioButton
+                    name: dir_high
+                    optionName: direction
+                    optionPart: high
+                  - type: RadioButton
+                    name: dir_low
+                    optionName: direction
+                    optionPart: low
+          - type: LayoutBox
+            margin: large
+            children:
+              - name: method_significant
+                type: RadioButton
+                optionName: method
+                optionPart: significant
   - name: panel_transforms
     type: CollapseBox
     label: Terms refinements
@@ -164,8 +164,6 @@ children:
                 stretchFactor: 0.5
                 template:
                   type: ComboBox
-      - type: Label
-        label: Force inclution
       - type: Supplier
         name: includedSupplier
         label: Force inclusion
@@ -173,15 +171,15 @@ children:
         stretchFactor: 1
         format: VariableLabel
         children:
-                    -   type: TargetLayoutBox
-                        label: Inclution forced
-                        children:
-                            -   type: ListBox
-                                name: included
-                                isTarget: true
-                                valueFilter: unique
-                                template:
-                                    type: VariableLabel
+          - type: TargetLayoutBox
+            label: Inclution forced
+            children:
+              - type: ListBox
+                name: included
+                isTarget: true
+                valueFilter: unique
+                template:
+                  type: VariableLabel
   - name: panel_output
     type: CollapseBox
     label: Output

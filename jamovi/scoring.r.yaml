@@ -2,6 +2,43 @@ name: scoring
 title: Scoring
 jrs: '1.0'
 items:
+
+## these are handled by SmartInfo class
+    -   name: info
+        title: Introduction
+        type: Html
+    -   name: extrainfo
+        title: Extra Info
+        type: Html
+        visible: false
+    -   name: issues
+        title: Issues
+        type: Html
+        visible: false
+
+    -   name: varstab
+        title: Variables
+        type: Table
+        columns:
+            -   name: name
+                type: text
+                title: Name
+            -   name: type
+                type: text
+                title: Type
+            -   name: forced
+                type: text
+                title: Transform
+            -   name: method
+                type: text
+                title: Inclusion
+            -   name: selected
+                type: text
+                title: Selected
+            -   name: selected_trans
+                type: text
+                title: Selected Transf.
+
     -   name: univariate
         title: Univariate effects
         type: Table
