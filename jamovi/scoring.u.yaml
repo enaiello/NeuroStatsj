@@ -16,7 +16,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Categorical Pretictors
+        label: Dichotomous Pretictors
         children:
           - type: VariablesListBox
             name: factors
@@ -28,56 +28,188 @@ children:
             name: covs
             isTarget: true
   - type: CollapseBox
-    label: Continous predictors
+    label: Model selection
+    name: model_selection_panel
     collapsed: true
     stretchFactor: 1
-    style: inline
+    style: list
     children:
-      - type: Label
-        label: Transformations
-        name: covsTransformations
+      - type: LayoutBox
+        name: model_selection_fist
+        style: inline
         children:
-          - name: covsTransformations_linear
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: linear
-          - name: covsTransformations_quadratic
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: quadratic
-          - name: covsTransformations_cubic
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: cubic
-          - name: covsTransformations_log
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: log
-          - name: covsTransformations_log10
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: log10
-          - name: covsTransformations_sqrt
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: sqrt
-          - name: covsTransformations_reciprocal
-            type: CheckBox
-            optionName: covsTransformations
-            optionPart: reciprocal
-      - type: Label
-        label: Method
-        children:
-          - type: RadioButton
-            name: method_best
-            optionName: method
-            optionPart: best
-          - type: RadioButton
-            name: method_univariate
-            optionName: method
-            optionPart: univariate
-  - type: LayoutBox
-    margin: large
+          - type: Label
+            label: Statistical model
+            children:
+              - type: RadioButton
+                name: model_type_lm
+                optionName: model_type
+                optionPart: lm
+              - type: RadioButton
+                name: model_type_nb
+                optionName: model_type
+                optionPart: nb
+              - type: RadioButton
+                name: model_type_pois
+                optionName: model_type
+                optionPart: pois
+              - type: RadioButton
+                name: model_type_beta
+                optionName: model_type
+                optionPart: beta
+        
+          - type: Label
+            label: Transformations
+            name: covsTransformations
+            children:
+              - type: CheckBox
+                name: select
+              - type: Label
+                label: Among
+                children:
+                  - name: covsTransformations_lin
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: lin
+                    enable: (select)
+                  - name: covsTransformations_quad
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: quad
+                    enable: (select)
+                  - name: covsTransformations_log
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: log
+                    enable: (select)
+                  - name: covsTransformations_rec
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: rec
+                    enable: (select)
+                  - name: covsTransformations_log100
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: log100
+                    enable: (select)
+                  - name: covsTransformations_log10
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: log10
+                    enable: (select)
+                  - name: covsTransformations_sqrt
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: sqrt
+                    enable: (select)
+                  - name: covsTransformations_cub
+                    type: CheckBox
+                    optionName: covsTransformations
+                    optionPart: cub
+                    enable: (select)
+          - type: LayoutBox
+            name: model_selection_second
+            style: list
+            children:
+
+                - type: Label
+                  label: Terms Selection
+                  children:
+                    - type: RadioButton
+                      name: method_step
+                      optionName: method
+                      optionPart: step
+                    - type: RadioButton
+                      name: method_univariate
+                      optionName: method
+                      optionPart: univariate
+                - type: Label
+                  label: Scores direction (worse score)
+                  children:
+                    - type: RadioButton
+                      name: dir_high
+                      optionName: direction
+                      optionPart: high
+                    - type: RadioButton
+                      name: dir_low
+                      optionName: direction
+                      optionPart: low
+  - name: panel_transforms
+    type: CollapseBox
+    label: Terms refinements
+    collapsed: true
+    stretchFactor: 1
     children:
-      - type: Output
-        name: zscores
+      - type: LayoutBox
+        style: list
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Force transformations
+          - type: ListBox
+            name: forced
+            stretchFactor: 1
+            showColumnHeaders: false
+            columns:
+              - name: var
+                label: null
+                selectable: false
+                stretchFactor: 1
+                maxWidth: 300
+                template:
+                  type: VariableLabel
+              - name: type
+                label: null
+                selectable: false
+                stretchFactor: 0.5
+                template:
+                  type: ComboBox
+      - type: Label
+        label: Force inclution
+      - type: Supplier
+        name: includedSupplier
+        label: Force inclusion
+        persistentItems: false
+        stretchFactor: 1
+        format: VariableLabel
+        children:
+                    -   type: TargetLayoutBox
+                        label: Inclution forced
+                        children:
+                            -   type: ListBox
+                                name: included
+                                isTarget: true
+                                valueFilter: unique
+                                template:
+                                    type: VariableLabel
+  - name: panel_output
+    type: CollapseBox
+    label: Output
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        style: inline
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Equivalent score
+            children:
+              - name: es_zscore
+                type: CheckBox
+              - name: es_rank
+                type: CheckBox
+          - type: Label
+            label: percentile
+            children:
+              - name: perc
+                type: CheckBox
+              - type: ComboBox
+                name: perc_type
+          - type: Label
+            label: Scores
+            children:
+              - type: CheckBox
+                name: score_adjust
+              - type: CheckBox
+                name: score_raw

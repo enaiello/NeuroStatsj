@@ -1,119 +1,191 @@
----
 name: scoring
 title: Scoring
 menuGroup: NeuroStatsj
-version: '0.0.1'
+version: 0.0.1
 jas: '1.2'
 export: true
 completeWhenFilled: false
 description:
     main: |
-           Something here
+        Something here
     R:
         dontrun: true
         usage: |
             some code here
-            
-
-
 options:
-    - name: data
-      type: Data
-      description:
-          R: the data as a data frame
+    -   name: data
+        type: Data
+        description:
+            R: the data as a data frame
+    -   name: dep
+        title: Raw Score
+        type: Variable
+        default: ~
+        suggested:
+            - continuous
+            - ordinal
+        permitted: 
+            - numeric
+        description:
+            R: |
+                Update this when R package is to be dealt with
+    -   name: factors
+        title: Dichotomous Pretictors
+        type: Variables
+        suggested: 
+          - nominal
+        permitted: 
+          - factor
+        description:
+            R: |
+                Update this when R package is to be dealt with
+    -   name: covs
+        title: Continuous Pretictors
+        type: Variables
+        default: ~
+        suggested:
+            - continuous
+            - ordinal
+        permitted: 
+            - numeric
+        description:
+            R: |
+                Update this when R package is to be dealt with
 
-    - name: dep
-      title: Raw Score
-      type: Variable
-      default:
-      suggested:
-          - continuous
-          - ordinal
-      permitted:
-          - numeric
-      description:
-          R: >
-            Update this when R package is to be dealt with
+    -   name: model_type
+        title: Statistical Model
+        type: List
+        default: lm
+        options:
+            -   name: lm
+                title: Regression
+            -   name:  nb
+                title: Negative Binomial
+            -   name:  pois
+                title: Poisson (overdispersion)
+            -   name:  beta
+                title: Beta regression
 
-    - name: factors
-      title: Categorical Pretictors
-      type: Variables
-      suggested:
-         - nominal
-      permitted:
-        - factor
-      description:
-          R: >
-            Update this when R package is to be dealt with
+
+    -   name: covsTransformations
+        title: Transformations
+        type: NMXList
+        options:
+            -   name: lin
+                title: Linear
+            -   name: log
+                title: Natural Logarithm
+            -   name: log10
+                title: Base 10 Log
+            -   name: log100
+                title: Log(100-x)
+            -   name: rec
+                title: Reciprocal (1/y)
+            -   name: sqrt
+                title: Square root
+            -   name: quad
+                title: Quadratic
+            -   name: cub
+                title: Cubic
+
+        default:
+            - lin
+            - log
+            - log100
+            - rec
+        description:
+            R: |
+                Update this when R package is to be dealt with
+
+    -   name: select
+        title: Select best 
+        type: Bool
+        default: true
         
-    - name: covs
-      title: Continuous Pretictors
-      type: Variables
-      default:
-      suggested:
-        - continuous
-        - ordinal
-      permitted:
-        - numeric
-      description:
-          R: >
-            Update this when R package is to be dealt with
+    -   name: method
+        title: Selection method
+        type: List
+        options:
+            -   name: univariate
+                title: Keep significant
+            -   name: step
+                title: Stepwise
+        default: step
+        description:
+            R: Update this when R package is to be dealt with
+
+    -   name: direction
+        title: Most problematic scores
+        type: List
+        default: low
+        options:
+            -   name: low
+                title: Lowest
+            -   name: high
+                title: Highest
 
 
+    -   name: forced
+        type: Array
+        items: (covs)
+        default: ~
+        template:
+            type: Group
+            elements:
+                -   name: var
+                    type: Variable
+                    content: $key
+                -   name: type
+                    type: List
+                    options:
+                        - auto
+                        - lin
+                        - log
+                        - log10
+                        - log100
+                        - sqrt
+                        - rec
+                        - quad
+                        - cub
+                    default: auto
+        description:
+            R: |
+                a named vector of the form `c(var1="type", var2="type2")` 
+    -   name:  included
+        type: Variables
+        default: ~
+    -   name: es_zscore
+        title: z-score-based 
+        type: Bool
+        default: true
+    -   name: es_rank
+        title: Rank-based 
+        type: Bool
+        default: false
+    -   name: perc
+        title: percentile 
+        type: Bool
+        default: true
+    -   name: perc_type
+        type: List
+        default: eby5
+        options:
+            -   name: eby5
+                title: Extremes and by 5
+            -   name: eby10
+                title: Extremes and by 10
+            -   name:  by10
+                title: by 10
+            -   name:  by5
+                title: by 5
+            -   name:  all
+                title: All
 
-
-# this is an example of options that will come to R as list of list. This is usefull when you want
-# to have options that can be independently flagged in the UI
-    - name: covsTransformations
-      title: Transformations
-      type: NMXList
-      # do not use name: with spaces or other strange charcters
-      # title: can be anything a computer would read, so be relax about them
-      options:
-          - name: linear
-            title:   Linear
-          - name: quadratic
-            title:   Quadratic
-          - name: cubic
-            title: Cubic
-          - name: log
-            title: Natural Logarithm
-          - name: log10
-            title: Logarithm base 10
-          - name: sqrt
-            title: Square root
-          - name: reciprocal
-            title: Reciprocal (1/y)
-## the default directive decides which options is automatically selected at start up            
-      default:
-          - linear
-          - quadratic
-          - cubic
-          - log
-          - sqrt
-      description:
-          R: >
-            Update this when R package is to be dealt with
-
-
-
-    - name: method
-      title: Selection method
-      type: List
-      options:
-        - name: univariate
-          title: Best univariate fitting
-        - name: best
-          title: Best fitting combination
-      default: univariate
-      description:
-          R: >
-            Update this when R package is to be dealt with
-
-
-    - name: zscores
-      title: Z-scores
-      type: Output            
-
-...
-
+    -   name: score_adjust
+        title: Adjusted 
+        type: Bool
+        default: true
+    -   name: score_raw
+        title: Raw 
+        type: Bool
+        default: false

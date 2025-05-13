@@ -9,13 +9,23 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             factors = NULL,
             covs = NULL,
+            model_type = "lm",
             covsTransformations = list(
-                "linear",
-                "quadratic",
-                "cubic",
+                "lin",
                 "log",
-                "sqrt"),
-            method = "univariate", ...) {
+                "log100",
+                "rec"),
+            select = TRUE,
+            method = "step",
+            direction = "low",
+            forced = NULL,
+            included = NULL,
+            es_zscore = TRUE,
+            es_rank = FALSE,
+            perc = TRUE,
+            perc_type = "eby5",
+            score_adjust = TRUE,
+            score_raw = FALSE, ...) {
 
             super$initialize(
                 package="NeuroStatsj",
@@ -48,54 +58,163 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric"))
+            private$..model_type <- jmvcore::OptionList$new(
+                "model_type",
+                model_type,
+                default="lm",
+                options=list(
+                    "lm",
+                    "nb",
+                    "pois",
+                    "beta"))
             private$..covsTransformations <- jmvcore::OptionNMXList$new(
                 "covsTransformations",
                 covsTransformations,
                 options=list(
-                    "linear",
-                    "quadratic",
-                    "cubic",
+                    "lin",
                     "log",
                     "log10",
+                    "log100",
+                    "rec",
                     "sqrt",
-                    "reciprocal"),
+                    "quad",
+                    "cub"),
                 default=list(
-                    "linear",
-                    "quadratic",
-                    "cubic",
+                    "lin",
                     "log",
-                    "sqrt"))
+                    "log100",
+                    "rec"))
+            private$..select <- jmvcore::OptionBool$new(
+                "select",
+                select,
+                default=TRUE)
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
                 options=list(
                     "univariate",
-                    "best"),
-                default="univariate")
-            private$..zscores <- jmvcore::OptionOutput$new(
-                "zscores")
+                    "step"),
+                default="step")
+            private$..direction <- jmvcore::OptionList$new(
+                "direction",
+                direction,
+                default="low",
+                options=list(
+                    "low",
+                    "high"))
+            private$..forced <- jmvcore::OptionArray$new(
+                "forced",
+                forced,
+                items="(covs)",
+                default=NULL,
+                template=jmvcore::OptionGroup$new(
+                    "forced",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionVariable$new(
+                            "var",
+                            NULL,
+                            content="$key"),
+                        jmvcore::OptionList$new(
+                            "type",
+                            NULL,
+                            options=list(
+                                "auto",
+                                "lin",
+                                "log",
+                                "log10",
+                                "log100",
+                                "sqrt",
+                                "rec",
+                                "quad",
+                                "cub"),
+                            default="auto"))))
+            private$..included <- jmvcore::OptionVariables$new(
+                "included",
+                included,
+                default=NULL)
+            private$..es_zscore <- jmvcore::OptionBool$new(
+                "es_zscore",
+                es_zscore,
+                default=TRUE)
+            private$..es_rank <- jmvcore::OptionBool$new(
+                "es_rank",
+                es_rank,
+                default=FALSE)
+            private$..perc <- jmvcore::OptionBool$new(
+                "perc",
+                perc,
+                default=TRUE)
+            private$..perc_type <- jmvcore::OptionList$new(
+                "perc_type",
+                perc_type,
+                default="eby5",
+                options=list(
+                    "eby5",
+                    "eby10",
+                    "by10",
+                    "by5",
+                    "all"))
+            private$..score_adjust <- jmvcore::OptionBool$new(
+                "score_adjust",
+                score_adjust,
+                default=TRUE)
+            private$..score_raw <- jmvcore::OptionBool$new(
+                "score_raw",
+                score_raw,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..factors)
             self$.addOption(private$..covs)
+            self$.addOption(private$..model_type)
             self$.addOption(private$..covsTransformations)
+            self$.addOption(private$..select)
             self$.addOption(private$..method)
-            self$.addOption(private$..zscores)
+            self$.addOption(private$..direction)
+            self$.addOption(private$..forced)
+            self$.addOption(private$..included)
+            self$.addOption(private$..es_zscore)
+            self$.addOption(private$..es_rank)
+            self$.addOption(private$..perc)
+            self$.addOption(private$..perc_type)
+            self$.addOption(private$..score_adjust)
+            self$.addOption(private$..score_raw)
         }),
     active = list(
         dep = function() private$..dep$value,
         factors = function() private$..factors$value,
         covs = function() private$..covs$value,
+        model_type = function() private$..model_type$value,
         covsTransformations = function() private$..covsTransformations$value,
+        select = function() private$..select$value,
         method = function() private$..method$value,
-        zscores = function() private$..zscores$value),
+        direction = function() private$..direction$value,
+        forced = function() private$..forced$value,
+        included = function() private$..included$value,
+        es_zscore = function() private$..es_zscore$value,
+        es_rank = function() private$..es_rank$value,
+        perc = function() private$..perc$value,
+        perc_type = function() private$..perc_type$value,
+        score_adjust = function() private$..score_adjust$value,
+        score_raw = function() private$..score_raw$value),
     private = list(
         ..dep = NA,
         ..factors = NA,
         ..covs = NA,
+        ..model_type = NA,
         ..covsTransformations = NA,
+        ..select = NA,
         ..method = NA,
-        ..zscores = NA)
+        ..direction = NA,
+        ..forced = NA,
+        ..included = NA,
+        ..es_zscore = NA,
+        ..es_rank = NA,
+        ..perc = NA,
+        ..perc_type = NA,
+        ..score_adjust = NA,
+        ..score_raw = NA)
 )
 
 scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -104,7 +223,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         univariate = function() private$.items[["univariate"]],
         multiple = function() private$.items[["multiple"]],
-        zscores = function() private$.items[["zscores"]]),
+        final = function() private$.items[["final"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -130,7 +249,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `title`="R\u00B2"),
                     list(
-                        `name`="ftest", 
+                        `name`="test", 
                         `type`="number", 
                         `title`="F"),
                     list(
@@ -168,7 +287,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `title`="SE"),
                     list(
-                        `name`="t", 
+                        `name`="test", 
                         `type`="number", 
                         `title`="t"),
                     list(
@@ -184,12 +303,40 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dep",
                     "factors",
                     "covs")))
-            self$add(jmvcore::Output$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="zscores",
-                title="Z-scores",
-                varTitle="`Z_${ dep }`",
-                varDescription="Z scores"))}))
+                name="final",
+                title="Final model",
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `type`="text", 
+                        `title`="Predictors"),
+                    list(
+                        `name`="b", 
+                        `type`="number", 
+                        `title`="Coef"),
+                    list(
+                        `name`="se", 
+                        `type`="number", 
+                        `title`="SE"),
+                    list(
+                        `name`="test", 
+                        `type`="number", 
+                        `title`="t"),
+                    list(
+                        `name`="df", 
+                        `type`="integer", 
+                        `title`="df"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                clearWith=list(
+                    "dep",
+                    "factors",
+                    "covs")))}))
 
 scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "scoringBase",
@@ -208,7 +355,8 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Scoring
@@ -217,20 +365,32 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' some code here
 #'}
 #' @param data the data as a data frame
 #' @param dep Update this when R package is to be dealt with
 #' @param factors Update this when R package is to be dealt with
 #' @param covs Update this when R package is to be dealt with
+#' @param model_type .
 #' @param covsTransformations Update this when R package is to be dealt with
+#' @param select .
 #' @param method Update this when R package is to be dealt with
+#' @param direction .
+#' @param forced a named vector of the form \code{c(var1="type",
+#'   var2="type2")}
+#' @param included .
+#' @param es_zscore .
+#' @param es_rank .
+#' @param perc .
+#' @param perc_type .
+#' @param score_adjust .
+#' @param score_raw .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$zscores} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -245,13 +405,23 @@ scoring <- function(
     dep = NULL,
     factors,
     covs = NULL,
+    model_type = "lm",
     covsTransformations = list(
-                "linear",
-                "quadratic",
-                "cubic",
+                "lin",
                 "log",
-                "sqrt"),
-    method = "univariate") {
+                "log100",
+                "rec"),
+    select = TRUE,
+    method = "step",
+    direction = "low",
+    forced = NULL,
+    included = NULL,
+    es_zscore = TRUE,
+    es_rank = FALSE,
+    perc = TRUE,
+    perc_type = "eby5",
+    score_adjust = TRUE,
+    score_raw = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("scoring requires jmvcore to be installed (restart may be required)")
@@ -259,12 +429,14 @@ scoring <- function(
     if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(factors)) factors <- jmvcore::resolveQuo(jmvcore::enquo(factors))
     if ( ! missing(covs)) covs <- jmvcore::resolveQuo(jmvcore::enquo(covs))
+    if ( ! missing(included)) included <- jmvcore::resolveQuo(jmvcore::enquo(included))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(factors), factors, NULL),
-            `if`( ! missing(covs), covs, NULL))
+            `if`( ! missing(covs), covs, NULL),
+            `if`( ! missing(included), included, NULL))
 
     for (v in factors) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -272,8 +444,19 @@ scoring <- function(
         dep = dep,
         factors = factors,
         covs = covs,
+        model_type = model_type,
         covsTransformations = covsTransformations,
-        method = method)
+        select = select,
+        method = method,
+        direction = direction,
+        forced = forced,
+        included = included,
+        es_zscore = es_zscore,
+        es_rank = es_rank,
+        perc = perc,
+        perc_type = perc_type,
+        score_adjust = score_adjust,
+        score_raw = score_raw)
 
     analysis <- scoringClass$new(
         options = options,
