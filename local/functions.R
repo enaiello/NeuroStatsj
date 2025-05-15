@@ -1,5 +1,19 @@
+y<-rnorm(10)
+x<-rnorm(10)
+z<-rep(c(-1,1),5)
+f<-factor(z)
+contrasts(f)<- structure(matrix(c(-0.5, 0.5), ncol = 1), dimnames = list(NULL, ""))
 
-fixclasses<-function(){
+model<-lm(y~f)
+summary(model)
+summary(model)
+as.numeric(performance::r2(model)[[1]])
+a<-MASS::stepAIC(model,direction="both",trace=0)
+attributes(a$anova)              
+a$anova         
+attributes(a$anova)$heading[[5]]
+
+              fixclasses<-function(){
 
   fixes<-yaml::yaml.load_file("jamovi/fixclasses.yaml")
   refs<-as.data.frame(do.call("rbind",fixes))

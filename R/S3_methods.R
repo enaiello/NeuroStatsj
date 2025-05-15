@@ -40,23 +40,30 @@ make_formula <- function(model, obj) UseMethod(".make_formula")
 
 .make_formula_res<-function(model,obj) {
   
-   ### first the covariates
 
-   vars<-names(obj$selected_covs)
-   terms<-unlist(obj$selected_covs)
-   covsobj<-obj$covs[vars]
-   coefs<-coef(obj$model)[names(coef(obj$model)) %in% terms ]
+   data<-model$model
+   covs<-list()
+   factors<-list()
+   for (x in obj$selected) {
+        if (!is.factor(data[[x$var]])) {
+          covs[[x$name]]<-x
+        } else {
+          factors[[x$name]]<-x
+        }
+   }
+
+   coefs<-coef(model)[names(coef(model)) %in% unlist(lapply(covs, function(x) x$var)) ]
    text<-paste("Adjusted score = raw score -")
-   labs<-unlist(lapply(covsobj, function(x) x$selection$info$label(x$name)))
-   means<-lapply(covsobj, function(x) x$selection$mean)
+   labs<-unlist(lapply(covs, function(x) TRANSFUN[[x$id]]$label(x$name)))
+   means<-lapply(covs, function(x) mean(data[[x$var]],na.rm=TRUE))
    form<-paste0(sprintf("%.4f * ( %s - %.4f)",coefs, labs, means),collapse=" + ")
    form <- gsub("+ -"," - ",form,fixed=T)
    ## then the factors
-   if (length(obj$selected_factors)>0) {
-     coefs<-coef(obj$model)[names(coef(obj$model)) %in% obj$selected_factors]
-     labs<-obj$selected_factors
-     fform<-paste0(sprintf("%.4f * %s",coefs, labs),collapse=" + ")
-     form<-paste(form,fform)
+
+   if (length(factors)>0) {
+     coefs<-coef(model)[names(coef(model)) %in% unlist(lapply(factors, function(x) x$var))]
+     fform<-paste0(sprintf("%.4f * %s",coefs, unlist(lapply(factors, function(x) x$name))),collapse=" + ")
+     form<-paste(form,fform,sep=" + ")
    }
   
    form
@@ -113,3 +120,23 @@ make_calc_formula <- function(model, obj) UseMethod(".make_calc_formula")
    form
   
 }
+
+
+#### some formatting 
+
+coefficients_table <- function(model) UseMethod(".coefficients")
+
+.coefficients.default <-function(model) {
+  
+  tab<-as.data.frame(summary(model)$coefficients)[-1,]
+  names(tab)<-c("estimate","se","test","p")
+  tab$df  <-  df.residual(model)
+
+  if (nrow(tab)==1) {
+    tab$r2  <-  as.numeric(performance::r2(model)[[1]])
+    tab$aic <-  stats::AIC(model)
+  }
+  tab
+  
+}
+

@@ -16,6 +16,10 @@ items:
         type: Html
         visible: false
 
+    -   name: formula
+        title: Formula
+        type: Html
+
     -   name: varstab
         title: Variables
         type: Table
@@ -26,7 +30,7 @@ items:
             -   name: type
                 type: text
                 title: Type
-            -   name: forced
+            -   name: transf
                 type: text
                 title: Transform
             -   name: method
@@ -38,45 +42,75 @@ items:
             -   name: selected_trans
                 type: text
                 title: Selected Transf.
+    -   name: final
+        title: Final model
+        type: Table
+        columns:
+            -   name: name
+                type: text
+                title: Predictors
+            -   name: fun
+                type: text
+                title: Transf.
+            -   name: estimate
+                type: number
+                title: Coef
+            -   name: se
+                type: number
+                title: SE
+            -   name: test
+                type: number
+                title: t
+            -   name: df
+                type: integer
+                title: df
+            -   name: p
+                title: p
+                type: number
+                format: zto,pvalue
 
     -   name: univariate
         title: Univariate effects
         type: Table
         columns:
-            -   name: term
+            -   name: name
                 type: text
-                title: Predictors
-            -   name: b
+                title: Predictor
+            -   name: fun
+                type: text
+                title: Transf.
+
+            -   name: estimate
                 type: number
                 title: Coef
             -   name: r2
                 type: number
                 title: R²
+            -   name: aic
+                type: number
+                title: AIC
             -   name:  test
                 type: number
-                title: F
-            -   name: df1
+                title: t
+            -   name: df
                 type: integer
-                title: df1
-            -   name: df2
-                type: integer
-                title: df2
+                title: df
             -   name: p
                 title: p
                 type: number
                 format: zto,pvalue
-        clearWith:
-            - dep
-            - factors
-            - covs
+
     -   name: multiple
         title: Multiple model
         type: Table
         columns:
-            -   name: term
+            -   name: name
                 type: text
                 title: Predictors
-            -   name: b
+            -   name: fun
+                type: text
+                title: Transf.
+            -   name: estimate
                 type: number
                 title: Coef
             -   name: se
@@ -92,34 +126,3 @@ items:
                 title: p
                 type: number
                 format: zto,pvalue
-        clearWith:
-            - dep
-            - factors
-            - covs
-    -   name: final
-        title: Final model
-        type: Table
-        columns:
-            -   name: term
-                type: text
-                title: Predictors
-            -   name: b
-                type: number
-                title: Coef
-            -   name: se
-                type: number
-                title: SE
-            -   name: test
-                type: number
-                title: t
-            -   name: df
-                type: integer
-                title: df
-            -   name: p
-                title: p
-                type: number
-                format: zto,pvalue
-        clearWith:
-            - dep
-            - factors
-            - covs

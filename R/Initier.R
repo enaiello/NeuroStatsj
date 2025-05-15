@@ -16,11 +16,13 @@ Initer <- R6::R6Class(
             si<-SmartInfo$new(jmvobj)
             si$infovec<-INFO
             si$info()
-        },
-        init_varstab= function() {
-          
-          ## set the selector clss as the machine
+            
+                      ## set the selector clss as the machine
           self$machine<-Selector$new(self$data)
+          ## general stuff
+          self$machine$model_fun<- MODEL_TYPE[[self$options$model_type]]$fun
+          self$machine$transformations<-self$options$covsTransformations
+
           ## deal with variables
           forced<-self$options$forced
           included<-self$options$included
@@ -32,32 +34,39 @@ Initer <- R6::R6Class(
              for (f in included) if (f==x) inc<-TRUE
              if (inc) method="user"
              method=METHOD_LABEL[[method]]
-             list(name=x,type="Covariate",forced=TRANSFUN[[trans]]$name,include=inc,method=method)}
+             list(name=x,type="Covariate",forced=TRANSFUN[[trans]]$id,transf=TRANSFUN[[trans]]$name,include=inc,method=method)}
              )
           factors<-lapply(self$options$factors,function(x) {
             
-           method<-self$options$method
-           inc<-FALSE
-           for (f in included) if (f==x) inc<-TRUE
-             if (inc) method="user"
-             method=METHOD_LABEL[[method]]
-             list(name=x,type="Factor",forced="None",include=inc, method=method)}
-             )
+                    method<-self$options$method
+                    inc<-FALSE
+                    for (f in included) if (f==x) inc<-TRUE
+                    if (inc) method="user"
+                    method=METHOD_LABEL[[method]]
+                    list(name=x,type="Factor",transf="None",include=inc, method=method)
+          })
           ## fill the machine
+          self$machine$dep<-self$options$dep
           self$machine$covs<-covs
           self$machine$factors<-factors
-          self$machine$model_fun<- MODEL_TYPE[[self$options$model_type]]
-          self$machine$transformations<-self$options$covsTransformations
-          ## return info
-          vars <- c(covs, factors)
-          vars
+
+            
+        },
+        init_varstab= function() {
+          
+          c(self$machine$covs_info,self$machine$factors)
+
           
           },
         init_univariate= function() {
-          
+  
+           self$machine$univariate()
 
-          
-          
+        },
+        init_multiple= function() {
+  
+          c(self$machine$covs_info,self$machine$factors)
+
         }
 
         #### init functions #####

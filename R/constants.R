@@ -9,8 +9,8 @@ TRANSFUN[["rec"]]<-list(id="rec",name="Reciprocal",fun=function(x) 1/x,label=fun
 TRANSFUN[["quad"]]<-list(id="quad",name="Quadratic",fun=function(x) x^2,label=function(x) sprintf("%s\u00B2",x))
 TRANSFUN[["cub"]]<-list(id="cub",name="Cubic",fun=function(x) x^3,label=function(x) sprintf("%s\u00B3",x))
 TRANSFUN[["sqrt"]]<-list(id="sqrt",name="Squared Root",fun=function(x) sqrt(x),label=function(x) sprintf("%s\u221A",x))
-
-TRANSFUN[["auto"]]<-list(id="auto",name="Auto",label="Automatic")
+TRANSFUN[["auto"]]<-list(id=NULL,name="Auto",label="Automatic")
+TRANSFUN[["none"]]<-list(id="none",name="None",fun=identity,label=function(x) sprintf("%s",x))
 
 
 MODEL_TYPE<-list()

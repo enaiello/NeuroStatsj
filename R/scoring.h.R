@@ -242,10 +242,11 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         info = function() private$.items[["info"]],
         extrainfo = function() private$.items[["extrainfo"]],
         issues = function() private$.items[["issues"]],
+        formula = function() private$.items[["formula"]],
         varstab = function() private$.items[["varstab"]],
+        final = function() private$.items[["final"]],
         univariate = function() private$.items[["univariate"]],
-        multiple = function() private$.items[["multiple"]],
-        final = function() private$.items[["final"]]),
+        multiple = function() private$.items[["multiple"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -267,6 +268,10 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="issues",
                 title="Issues",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="formula",
+                title="Formula"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="varstab",
@@ -281,7 +286,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text", 
                         `title`="Type"),
                     list(
-                        `name`="forced", 
+                        `name`="transf", 
                         `type`="text", 
                         `title`="Transform"),
                     list(
@@ -298,15 +303,53 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Selected Transf."))))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="final",
+                title="Final model",
+                columns=list(
+                    list(
+                        `name`="name", 
+                        `type`="text", 
+                        `title`="Predictors"),
+                    list(
+                        `name`="fun", 
+                        `type`="text", 
+                        `title`="Transf."),
+                    list(
+                        `name`="estimate", 
+                        `type`="number", 
+                        `title`="Coef"),
+                    list(
+                        `name`="se", 
+                        `type`="number", 
+                        `title`="SE"),
+                    list(
+                        `name`="test", 
+                        `type`="number", 
+                        `title`="t"),
+                    list(
+                        `name`="df", 
+                        `type`="integer", 
+                        `title`="df"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="univariate",
                 title="Univariate effects",
                 columns=list(
                     list(
-                        `name`="term", 
+                        `name`="name", 
                         `type`="text", 
-                        `title`="Predictors"),
+                        `title`="Predictor"),
                     list(
-                        `name`="b", 
+                        `name`="fun", 
+                        `type`="text", 
+                        `title`="Transf."),
+                    list(
+                        `name`="estimate", 
                         `type`="number", 
                         `title`="Coef"),
                     list(
@@ -314,37 +357,37 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `title`="R\u00B2"),
                     list(
+                        `name`="aic", 
+                        `type`="number", 
+                        `title`="AIC"),
+                    list(
                         `name`="test", 
                         `type`="number", 
-                        `title`="F"),
+                        `title`="t"),
                     list(
-                        `name`="df1", 
+                        `name`="df", 
                         `type`="integer", 
-                        `title`="df1"),
-                    list(
-                        `name`="df2", 
-                        `type`="integer", 
-                        `title`="df2"),
+                        `title`="df"),
                     list(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "dep",
-                    "factors",
-                    "covs")))
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multiple",
                 title="Multiple model",
                 columns=list(
                     list(
-                        `name`="term", 
+                        `name`="name", 
                         `type`="text", 
                         `title`="Predictors"),
                     list(
-                        `name`="b", 
+                        `name`="fun", 
+                        `type`="text", 
+                        `title`="Transf."),
+                    list(
+                        `name`="estimate", 
                         `type`="number", 
                         `title`="Coef"),
                     list(
@@ -363,45 +406,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "dep",
-                    "factors",
-                    "covs")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="final",
-                title="Final model",
-                columns=list(
-                    list(
-                        `name`="term", 
-                        `type`="text", 
-                        `title`="Predictors"),
-                    list(
-                        `name`="b", 
-                        `type`="number", 
-                        `title`="Coef"),
-                    list(
-                        `name`="se", 
-                        `type`="number", 
-                        `title`="SE"),
-                    list(
-                        `name`="test", 
-                        `type`="number", 
-                        `title`="t"),
-                    list(
-                        `name`="df", 
-                        `type`="integer", 
-                        `title`="df"),
-                    list(
-                        `name`="p", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "dep",
-                    "factors",
-                    "covs")))}))
+                        `format`="zto,pvalue"))))}))
 
 scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "scoringBase",
@@ -458,10 +463,11 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$info} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$extrainfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$issues} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$formula} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$varstab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

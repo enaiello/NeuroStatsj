@@ -172,7 +172,7 @@ children:
         format: VariableLabel
         children:
           - type: TargetLayoutBox
-            label: Inclution forced
+            label: Inclusion forced
             children:
               - type: ListBox
                 name: included

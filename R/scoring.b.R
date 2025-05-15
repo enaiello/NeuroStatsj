@@ -18,9 +18,22 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 ### set up the R6 workhorse class
                 private$.runner <- Runner$new(self)
-                ### univariate table ###
+                ### info table ###
                 aSmartObj <- SmartTable$new(self$results$varstab, private$.runner)
                 ladd(private$.smartObjs) <- aSmartObj
+                ### univariate table ###
+                aSmartObj <- SmartTable$new(self$results$univariate, private$.runner)
+                aSmartObj$spaceBy <-"name"
+                aSmartObj$combineBelow <-"name"
+                ladd(private$.smartObjs) <- aSmartObj
+
+                ### multiple table ###
+                aSmartObj <- SmartTable$new(self$results$multiple, private$.runner)
+                ladd(private$.smartObjs) <- aSmartObj
+                ### final table ###
+                aSmartObj <- SmartTable$new(self$results$final, private$.runner)
+                ladd(private$.smartObjs) <- aSmartObj
+
                 ### init all ####
                 for (tab in private$.smartObjs) {
                     tab$initTable()
@@ -30,8 +43,12 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .run = function() {
             ginfo("run")
+            private$.runner$data<-stats::na.omit(self$data)
             private$.runner$run()
-        
+            for (tab in private$.smartObjs) {
+                    tab$runTable()
+                }
+            
             
         },
         .cleandata=function() {
