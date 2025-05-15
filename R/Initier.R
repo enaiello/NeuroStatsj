@@ -7,6 +7,7 @@ Initer <- R6::R6Class(
         dispatcher = NULL,
         data = NULL,
         machine= NULL,
+        adjuster=NULL,
         initialize = function(jmvobj) {
             super$initialize(jmvobj)
             self$data<-jmvobj$data
@@ -47,7 +48,12 @@ Initer <- R6::R6Class(
              trans<-"auto"
              method<-self$options$method
              inc<-FALSE
+
              for (f in forced) if (f$var==x) trans<-f$type
+             if (!self$options$select)
+                 if (trans=="auto") trans<-"lin"
+    
+             
              for (f in included) if (f==x) inc<-TRUE
              if (inc) method="user"
              method=METHOD_LABEL[[method]]
@@ -66,6 +72,9 @@ Initer <- R6::R6Class(
           self$machine$dep<-self$options$dep
           self$machine$covs<-covs
           self$machine$factors<-factors
+          
+          ## prepare the adjuster
+          self$adjuster<-Adjuster$new()
 
             
         },
@@ -84,7 +93,23 @@ Initer <- R6::R6Class(
   
           c(self$machine$covs_info,self$machine$factors)
 
+        },
+        init_scores_percentiles= function() {
+  
+
+          switch (self$options$perc_type,
+                  eby5 = {data<-data.frame(perc=c(1:5,seq(10,95,5),96:99))},
+                  eby10= {data<-data.frame(perc=c(1:5,seq(10,90,10),95:99))},
+                  by10= {data<-data.frame(perc=c(1,seq(10,90,10),99))},
+                  by5= {data<-data.frame(perc=c(1,seq(10,90,5),99))}
+                  
+          )
+          self$adjuster$perc_type=data$perc
+          data
+
         }
+
+
 
         #### init functions #####
     ), # End public

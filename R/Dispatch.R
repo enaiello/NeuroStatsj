@@ -208,6 +208,12 @@ private = list(
 
 dispatch_message_cleaner<-function(jmvobj) {
   
-  lapply(jmvobj$results$items, function(x) if ("Html" %in% class(x)) x$setContent(" ")  )
-  
+  fun<-function(obj) {
+    lapply(obj$items, function(x) {
+        if ("Group" %in% class(x)) fun(x)
+        else
+        if ("Html" %in% class(x)) x$setContent(" ")  
+    })
+  }
+  fun(jmvobj$results)
 }

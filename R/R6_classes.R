@@ -1,16 +1,11 @@
 Adjuster <- R6::R6Class("Adjuster",
   public = list(
-    model = NULL,
-    initialize = function(model) {
-      self$model <- model
-      private$.model_class <- class(model)
-      private$.family      <- family(model)
-      private$.link_fun    <- private$.family$linkfun
-      private$.link_inv    <- private$.family$linkinv
-      private$.adj_fun     <- adj_fun(model)
-    },
-    
+  
+    perc_type=NULL,
+    perc_dir ="inc",    
     adjust=function() {
+      
+      if (is.null(self$model)) stop("Please pass a model before adjusting")
       
       model<-self$model
       cat ("adjusting with ", deparse(stats::formula(model)))
@@ -20,8 +15,7 @@ Adjuster <- R6::R6Class("Adjuster",
       mm<-mm[,attr(mm,"assign")>0]
       for (n in colnames(mm)) {
          if (length(unique(mm[,n]))==2) {
-            warning("Variable ",n," coerced to numeric dichotomous variable")
-            mm[,n]<-as.numeric(factor(mm[,n]))-1.5
+            mm[,n]<-as.numeric(as.character(mm[,n]))
          }
          else mm[,n]<-as.numeric(scale(mm[,n],scale=FALSE))
       }
@@ -32,18 +26,18 @@ Adjuster <- R6::R6Class("Adjuster",
       preds<-  private$.link_inv(preds)
       op<-private$.adj_fun$op
       score<-op(model$model[[dep]],preds)
-      return(score)
+      return(as.numeric(score))
     },
-    percentiles=function(what=NULL,dir) {
-      if (is.null(what))
+    percentiles=function() {
+      if (is.null(self$perc_type))
           p<- seq(0.01, .99, by = 0.01)
       else
-          p <- what/100
+          p <- self$perc_type/100
       values<-self$adjust()
       ps<-data.frame(val=quantile(values, probs = p))
       ps$perc<-rownames(ps)
       rownames(ps)<-NULL
-      if (dir=="decreasing") {
+      if (self$perc_dir=="dec") {
         ps<-ps[order(ps$val,decreasing=TRUE),]
         ps$perc<-rev(ps$perc)
         rownames(ps)<-NULL
@@ -53,7 +47,21 @@ Adjuster <- R6::R6Class("Adjuster",
     }
   ), ## end of public
   active= list(
-    
+  
+
+    model = function(model) {
+          
+      if (missing(model)) {
+        return(private$.model)
+      }  
+      private$.model<-model
+      private$.model_class <- class(model)
+      private$.family      <- family(model)
+      private$.link_fun    <- private$.family$linkfun
+      private$.link_inv    <- private$.family$linkinv
+      private$.adj_fun     <- adj_fun(model)
+      
+    } , 
     model_class=function(value) {
       
       if (missing(value)) {
@@ -93,6 +101,7 @@ Adjuster <- R6::R6Class("Adjuster",
   ), # end of active
   private=list(
     
+    .model = NULL,
     .model_class = NULL,
     .family=NULL,
     .link_fun=NULL,
@@ -268,7 +277,15 @@ Selector <- R6::R6Class("Selector",
     },
     pretty_formulate=function() {
       form<-self$formulate()
-      paste("<h2> Adjustment formula</h2>","<p>",form,"</p>")
+      text<-paste("<h2> Adjustment formula</h2>","<p><b>",form,"</b></p>")
+      for (var in self$selected) {
+        if (var$type=="factor") {
+          cnt<-contrasts(self$data[[var$name]])
+          atext<-  paste("<p>Variable", var$name, "is coded:", paste(rownames(cnt),cnt,sep=" = ",collapse=", "))
+          text<-paste(text,atext)
+        }
+      }
+    text
       
     }
 
@@ -294,6 +311,7 @@ Selector <- R6::R6Class("Selector",
         private$.covs_info<-alist
         lapply(alist,function(x) {
            private$.covs[[x$name]]$name<-x$name 
+           mark(x$name,x$forced)
            if(is.null(x$forced) || isFALSE(x$forced)) private$.covs[[x$name]]$transformations<-private$.transformations
            else private$.covs[[x$name]]$transformations<-list(TRANSFUN[[x$forced]])
            })
@@ -321,7 +339,6 @@ Selector <- R6::R6Class("Selector",
         self$included<-c(self$included,unlist(lapply(alist, function(x) if (hasName(x,"include") && x$include==TRUE) x$name else NULL)))
         private$.factors<-alist
         names(private$.factors)<-names
-        private$.factors_names<-names
 
         }
        },
@@ -378,7 +395,6 @@ Selector <- R6::R6Class("Selector",
     .vars=NULL,
     .data=NULL,
     .model_fun=NULL,
-    .factors_names=NULL,
     .transformations=NULL,
     .univariate_tab=NULL,
     .maketerms = function(df) {
@@ -406,21 +422,6 @@ Selector <- R6::R6Class("Selector",
       
     },
 
-    .selectterm = function(varobj) {
-      
-    crit<-lapply(varobj$trans, function(tran) list(name=tran$varname,R2=private$.criteria(tran$varname)))
-    crit<-do.call(rbind,crit)
-    win<-which.max(crit[,2])
-    
-    smean<-mean(private$.data[[varobj$trans[[as.numeric(win)]]$varname]],na.rm=TRUE)
-    private$.covs[[varobj$name]]$selection<-list(table=crit,
-                                                 crit=unlist(crit[as.numeric(win),2]),
-                                                 info=varobj$trans[[as.numeric(win)]],
-                                                 mean=smean)
-    self$selected_covs[[varobj$name]]<-varobj$trans[[as.numeric(win)]]$varname
-
-    },
-    
     .makemodel= function(var) {
       form<-as.formula(jmvcore::composeFormula(self$dep,var))
       opts<-self$opts
@@ -430,32 +431,7 @@ Selector <- R6::R6Class("Selector",
       tab<-coefficients_table(model)
       return(tab)
 
-    },
-   .testterm = function() {
-    
-      vars<-c(self$selected_covs,self$selected_factors)
-      form<-as.formula(jmvcore::composeFormula(self$dep,vars))
-      opts<-self$opts
-      opts[["formula"]]<-form
-      opts[["data"]]<-private$.data
-      model<-do.call(self$model_fun,opts)
-      steps<-MASS::stepAIC(model,direction="both",trace=0)
-      self$stepwise<-steps$anova
-      rr<-colnames(attr(terms(steps),"factors"))
-      selected_covs <- clapply(self$selected_covs, function(x) if(x %in% rr) x else NULL)
-
-      keep<-clapply(private$.covs,function(x) if ("include" %in% names(x) && x$include) x$selection$info$varname)
-      for (x in names(keep)) 
-         selected_covs[[x]]<-keep[[x]]
-      self$selected_covs<-selected_covs
-      selected_factors <- clapply(self$selected_factors, function(x) if(x %in% rr) x else NULL)
-      keep<-clapply(private$.factors,function(x) if ("include" %in% names(x) && x$include) x$name)
-      for (x in names(keep)) 
-           selected_factors[[x]]<-keep[[x]]
-       self$selected_factors<-selected_factors
-
-   }
-
+    }
 
   )
 )

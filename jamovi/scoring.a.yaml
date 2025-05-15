@@ -139,15 +139,24 @@ options:
                 -   name: type
                     type: List
                     options:
-                        - auto
-                        - lin
-                        - log
-                        - log10
-                        - log100
-                        - sqrt
-                        - rec
-                        - quad
-                        - cub
+                        - name: auto
+                          title: Auto
+                        - name: lin
+                          title: None (linear)
+                        - name: ln
+                          title: Ln (natural)
+                        - name: log10
+                          title: Log (base 10)
+                        - name: log100
+                          title: Ln(100-x)
+                        - name: sqrt
+                          title: Square root
+                        - name: rec
+                          title: Reciprocal (1/y)
+                        - name:  quad
+                          title: Quadratic
+                        - name:  cub
+                          title: Cubic
                     default: auto
         description:
             R: |
@@ -185,11 +194,28 @@ options:
     -   name: score_adjust
         title: Adjusted 
         type: Bool
-        default: true
+        default: false
     -   name: score_raw
         title: Raw 
         type: Bool
         default: false
+    -   name: score_preds
+        title: Predictors 
+        type: Bool
+        default: false
+
+    -   name: score_sort
+        title: Sort by Adjusted
+        type: List
+        default: none
+        options:
+            -   name: none
+                title: Data
+            -   name: inc
+                title: Increasing
+            -   name: dec
+                title: Decreasing
+
 
     -   name: .caller
         type: String

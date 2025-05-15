@@ -100,6 +100,8 @@ children:
                     type: CheckBox
                     optionName: covsTransformations
                     optionPart: quad
+                    enable: (select)
+
                   - name: covsTransformations_cub
                     type: CheckBox
                     optionName: covsTransformations
@@ -204,10 +206,35 @@ children:
                 type: CheckBox
               - type: ComboBox
                 name: perc_type
-          - type: Label
-            label: Scores
-            children:
-              - type: CheckBox
-                name: score_adjust
-              - type: CheckBox
-                name: score_raw
+          - type: LayoutBox
+            style: list
+            stretchFactor: 1
+            children:  
+          
+                  - type: Label
+                    label: Data table
+                    children:
+                      - type: CheckBox
+                        name: score_adjust
+                      - type: CheckBox
+                        name: score_raw
+                        enable: (score_adjust)
+                      - type: CheckBox
+                        name: score_preds
+                        enable: (score_adjust)
+                  - type: Label
+                    label: Data sort
+                    children:
+                      - type: RadioButton
+                        name: sort_none
+                        optionName: score_sort
+                        optionPart: none
+                      - type: RadioButton
+                        name: sort_inc
+                        optionName: score_sort
+                        optionPart: inc
+                      - type: RadioButton
+                        name: sort_dec
+                        optionName: score_sort
+                        optionPart: dec
+      

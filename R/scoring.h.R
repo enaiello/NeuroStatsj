@@ -24,8 +24,10 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             es_rank = FALSE,
             perc = TRUE,
             perc_type = "eby5",
-            score_adjust = TRUE,
+            score_adjust = FALSE,
             score_raw = FALSE,
+            score_preds = FALSE,
+            score_sort = "none",
             .caller = "scoring",
             .interface = "jamovi", ...) {
 
@@ -123,7 +125,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=list(
                                 "auto",
                                 "lin",
-                                "log",
+                                "ln",
                                 "log10",
                                 "log100",
                                 "sqrt",
@@ -160,11 +162,23 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..score_adjust <- jmvcore::OptionBool$new(
                 "score_adjust",
                 score_adjust,
-                default=TRUE)
+                default=FALSE)
             private$..score_raw <- jmvcore::OptionBool$new(
                 "score_raw",
                 score_raw,
                 default=FALSE)
+            private$..score_preds <- jmvcore::OptionBool$new(
+                "score_preds",
+                score_preds,
+                default=FALSE)
+            private$..score_sort <- jmvcore::OptionList$new(
+                "score_sort",
+                score_sort,
+                default="none",
+                options=list(
+                    "none",
+                    "inc",
+                    "dec"))
             private$...caller <- jmvcore::OptionString$new(
                 ".caller",
                 .caller,
@@ -192,6 +206,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..perc_type)
             self$.addOption(private$..score_adjust)
             self$.addOption(private$..score_raw)
+            self$.addOption(private$..score_preds)
+            self$.addOption(private$..score_sort)
             self$.addOption(private$...caller)
             self$.addOption(private$...interface)
         }),
@@ -212,6 +228,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         perc_type = function() private$..perc_type$value,
         score_adjust = function() private$..score_adjust$value,
         score_raw = function() private$..score_raw$value,
+        score_preds = function() private$..score_preds$value,
+        score_sort = function() private$..score_sort$value,
         .caller = function() private$...caller$value,
         .interface = function() private$...interface$value),
     private = list(
@@ -231,6 +249,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..perc_type = NA,
         ..score_adjust = NA,
         ..score_raw = NA,
+        ..score_preds = NA,
+        ..score_sort = NA,
         ...caller = NA,
         ...interface = NA)
 )
@@ -242,11 +262,11 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         info = function() private$.items[["info"]],
         extrainfo = function() private$.items[["extrainfo"]],
         issues = function() private$.items[["issues"]],
-        formula = function() private$.items[["formula"]],
         varstab = function() private$.items[["varstab"]],
         final = function() private$.items[["final"]],
         univariate = function() private$.items[["univariate"]],
-        multiple = function() private$.items[["multiple"]]),
+        multiple = function() private$.items[["multiple"]],
+        scores = function() private$.items[["scores"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -268,10 +288,6 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="issues",
                 title="Issues",
                 visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="formula",
-                title="Formula"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="varstab",
@@ -406,7 +422,56 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="p", 
                         `title`="p", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `format`="zto,pvalue"))))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    formula = function() private$.items[["formula"]],
+                    percentiles = function() private$.items[["percentiles"]],
+                    raws = function() private$.items[["raws"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="scores",
+                            title="Scoring Results")
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="formula",
+                            title="Formula"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="percentiles",
+                            title="Percentiles",
+                            columns=list(
+                                list(
+                                    `name`="perc", 
+                                    `title`="Percentile", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="val", 
+                                    `title`="Adj.Value", 
+                                    `type`="number"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="raws",
+                            title="Raw and Adjusted",
+                            visible="(score_adjust)",
+                            columns=list(
+                                list(
+                                    `name`="id", 
+                                    `title`="Person row", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raw", 
+                                    `title`="Raw Score", 
+                                    `type`="number", 
+                                    `visible`="(score_raw)"),
+                                list(
+                                    `name`="adj", 
+                                    `title`="Adj.Value", 
+                                    `type`="number"))))}))$new(options=options))}))
 
 scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "scoringBase",
@@ -456,6 +521,8 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param perc_type .
 #' @param score_adjust .
 #' @param score_raw .
+#' @param score_preds .
+#' @param score_sort .
 #' @param .caller .
 #' @param .interface .
 #' @return A results object containing:
@@ -463,11 +530,13 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$info} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$extrainfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$issues} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$formula} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$varstab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$scores$formula} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$scores$percentiles} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$scores$raws} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -497,8 +566,10 @@ scoring <- function(
     es_rank = FALSE,
     perc = TRUE,
     perc_type = "eby5",
-    score_adjust = TRUE,
+    score_adjust = FALSE,
     score_raw = FALSE,
+    score_preds = FALSE,
+    score_sort = "none",
     .caller = "scoring",
     .interface = "jamovi") {
 
@@ -536,6 +607,8 @@ scoring <- function(
         perc_type = perc_type,
         score_adjust = score_adjust,
         score_raw = score_raw,
+        score_preds = score_preds,
+        score_sort = score_sort,
         .caller = .caller,
         .interface = .interface)
 

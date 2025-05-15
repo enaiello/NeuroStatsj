@@ -16,9 +16,6 @@ items:
         type: Html
         visible: false
 
-    -   name: formula
-        title: Formula
-        type: Html
 
     -   name: varstab
         title: Variables
@@ -126,3 +123,39 @@ items:
                 title: p
                 type: number
                 format: zto,pvalue
+
+
+    -   name: scores
+        type: Group
+        title: Scoring Results
+        items:
+          -   name: formula
+              title: Formula
+              type: Html
+        
+          -   name: percentiles
+              title: Percentiles
+              type: Table
+              columns:
+                     - name: perc
+                       title: Percentile
+                       type: integer
+                     - name: val
+                       title: Adj.Value
+                       type: number
+                       
+          -   name: raws
+              title: Raw and Adjusted
+              type: Table
+              visible: (score_adjust)
+              columns:
+                     - name: id
+                       title: Person row
+                       type: integer
+                     - name: raw
+                       title: Raw Score
+                       type: number
+                       visible: (score_raw)
+                     - name: adj
+                       title: Adj.Value
+                       type: number

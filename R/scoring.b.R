@@ -37,6 +37,16 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 aSmartObj$hideOn <- list(df = NA)
                 ladd(private$.smartObjs) <- aSmartObj
 
+                ### scores_percentiles table ###
+                aSmartObj <- SmartTable$new(self$results$scores$percentiles, private$.runner)
+                ladd(private$.smartObjs) <- aSmartObj
+
+                ### scores_raws table ###
+                aSmartObj <- SmartTable$new(self$results$scores$raws, private$.runner)
+                aSmartObj$expandOnRun<-T
+                aSmartObj$expandFrom<-2
+                ladd(private$.smartObjs) <- aSmartObj
+                
                 ### init all ####
                 for (tab in private$.smartObjs) {
                     tab$initTable()

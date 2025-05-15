@@ -24,7 +24,7 @@ Runner <- R6::R6Class("Runner",
             self$multiple_tab<-self$machine$multiple()
             self$final_tab<-self$machine$select()
             form<-self$machine$pretty_formulate()
-            self$warning<-list(topic="formula",message=form,head="info")
+            self$warning<-list(topic="scores_formula",message=form,head="info")
 
             ### fix some column name            
             if (self$options$model_type=="lm") {
@@ -33,6 +33,10 @@ Runner <- R6::R6Class("Runner",
               attr(self$final_tab,"titles")<-list(test="t")
 
             }
+            
+            ## fill the adjuster
+            self$adjuster$model<-self$machine$model
+            
 
         },
         run_univariate= function() {
@@ -61,6 +65,34 @@ Runner <- R6::R6Class("Runner",
           }
          
           res
+        },
+        
+        run_scores_percentiles = function() {
+          
+          perc<-self$adjuster$percentiles()
+          perc
+        },
+
+        run_scores_raws = function() {
+          
+          data<-data.frame(id=rownames(self$data))
+          data$adj<-unlist(self$adjuster$adjust())
+          data$raw<-self$machine$data[[self$options$dep]]
+          if (self$options$score_preds) {
+          for (var in self$machine$selected)
+               data[[var$name]]<-self$machine$data[[var$name]]
+          }
+     
+          if ("inc" %in% self$options$score_sort) 
+                 data<-data[order(data$adj,decreasing=FALSE),]
+          if ("dec" %in% self$options$score_sort) 
+                 data<-data[order(data$adj,decreasing=TRUE),]
+         
+          if (nrow(self$data)>200) {
+            data<-data[1:200,]
+            self$warning<-list(topic="scores_raws",message="Only the first 100 cases are shown")
+          }
+          data
         }
 
         
