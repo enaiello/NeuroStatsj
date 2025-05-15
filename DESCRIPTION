@@ -9,4 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, MASS, performance
+Imports: jmvcore (>= 0.8.5), R6, MASS, betareg, statmod,performance
+RoxygenNote: 7.3.2

@@ -143,7 +143,7 @@ Selector <- R6::R6Class("Selector",
            df<-private$.testuniv(df)     
            
          }
-         private$.univariate_tab<-df    
+         private$.univariate_tab<-df  
          df
          },
 
@@ -153,9 +153,17 @@ Selector <- R6::R6Class("Selector",
       
       vars<-c(names(private$.covs),names(private$.factors))
       data<-private$.univariate_tab
+      
+      crit<-"r2"
+      fun<-which.max
+      if (any(is.na(data$r2))) {
+        crit="aic"
+        fun<-which.min
+      }
+      
       tab<-lapply(vars,function(x) {
          .data<-data[data$name==x,]
-         .max<-which.max(.data$r2)
+         .max<-fun(.data[[crit]])
          list(name=x,id=.data[.max,"id"], var=paste0(x,"_",.data[.max,"id"]),type=.data[.max,"type"])
          
       })
@@ -185,6 +193,8 @@ Selector <- R6::R6Class("Selector",
       opts[["formula"]]<-form
       opts[["data"]]<-private$.data
       model<-do.call(self$model_fun,opts)
+      
+      model<-fix_call(model)
       
       scope<-list(lower=~1, upper=form)
       if (is.something(self$included)) {
@@ -389,7 +399,8 @@ Selector <- R6::R6Class("Selector",
       for (i in seq_len(nrow(df))) {
           row<-df[i,]
           name<-paste0(row$name,"_",row$id)
-          ladd(dfout)<-cbind(row,private$.makemodel(name))
+          ltab<-private$.makemodel(name)
+          ladd(dfout)<-cbind(row,ltab)
       }
       as.data.frame(do.call(rbind,dfout))
       

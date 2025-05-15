@@ -19,7 +19,10 @@ adj_fun <- function(x, ...) UseMethod(".adj_fun")
 
 make_formula <- function(model, obj) UseMethod(".make_formula")
 
-.make_formula.default<-function(model,obj) stop("No formula for class ", paste(class(model),collapse=", "))
+.make_formula.default<-function(model,obj) {
+  warning("No formula for class ", paste(class(model),collapse=", "))
+  .make_formula.lm(model,obj)
+}
 
 .make_formula.lm<-function(model,obj) {
   
@@ -128,9 +131,9 @@ coefficients_table <- function(model) UseMethod(".coefficients")
 
 .coefficients.default <-function(model) {
   
+  jinfo("coefficient table for default model")
   tab<-as.data.frame(summary(model)$coefficients)[-1,]
   names(tab)<-c("estimate","se","test","p")
-  tab$df  <-  df.residual(model)
 
   if (nrow(tab)==1) {
     tab$r2  <-  as.numeric(performance::r2(model)[[1]])
@@ -139,4 +142,121 @@ coefficients_table <- function(model) UseMethod(".coefficients")
   tab
   
 }
+
+.coefficients.lm <-function(model) {
+
+    jinfo("coefficient table for lm")
+  tab<-as.data.frame(summary(model)$coefficients)[-1,]
+  names(tab)<-c("estimate","se","test","p")
+  tab$df <- df.residual(model)
+  if (nrow(tab)==1) {
+    tab$r2  <-  as.numeric(performance::r2(model)[[1]])
+    tab$aic <-  stats::AIC(model)
+  }
+  tab
+  
+}
+
+.coefficients.glm <-function(model) {
+  
+  jinfo("coefficient table for glm")
+
+  tab<-as.data.frame(summary(model)$coefficients)[-1,]
+  names(tab)<-c("estimate","se","test","p")
+  if (nrow(tab)==1) {
+    tab$r2  <-   as.numeric(performance::r2(model)[[1]])
+    tab$aic <-  stats::AIC(model)
+  }
+
+  tab
+  
+}
+
+
+.coefficients.negbin <-function(model) {
+  
+  jinfo("coefficient table for negbin")
+
+  tab<-as.data.frame(summary(model)$coefficients)[-1,]
+  names(tab)<-c("estimate","se","test","p")
+  if (nrow(tab)==1) {
+    tab$r2  <-   as.numeric(performance::r2(model)[[1]])
+    tab$aic <-  stats::AIC(model)
+  }
+
+  tab
+  
+}
+
+.coefficients.betareg <-function(model) {
+  
+  jinfo("coefficient table for betareg")
+
+  tab<-as.data.frame(summary(model)$coefficients)[-1,1:4]
+  names(tab)<-c("estimate","se","test","p")
+  if (nrow(tab)==1) {
+    tab$r2  <-  model$pseudo.r.squared
+    tab$aic <-  stats::AIC(model)
+  }
+  tab
+  
+}
+
+
+
+fix_call <- function(model) UseMethod(".fix_call")
+
+.fix_call.default <-function(model) {
+   model
+}
+
+.fix_call.betareg <- function(model) {
+  
+  opts<-list(formula=formula(model),data=model$model)
+  call<- as.call(c(parse(text = "betareg::betareg")[[1]], opts))
+  model$call<-call
+  model
+  
+  
+  
+}
+
+#' @export
+extractAIC.betareg <- function(fit, scale, k=2, ...) {
+  
+    n <- length(fit$residuals)
+    edf <- n - fit$df.residual
+    c(edf, -2*fit$loglik + k * edf)  
+  
+}
+
+#' @export
+update.betareg <- function(object, formula., ..., evaluate = TRUE) {
+  
+  if (is.null(call <- getCall(object)))
+    stop("object has no call slot")
+
+  if (!missing(formula.)) {
+    # betareg uses Formula objects internally — coerce to regular formula
+    base_formula <- formula(object)
+    if (inherits(base_formula, "Formula")) {
+      base_formula <- formula(base_formula, lhs = TRUE, rhs = 1)  # use only mean part
+    }
+
+    call$formula <- update.formula(base_formula, formula.)
+  }
+
+  extras <- match.call(expand.dots = FALSE)$...
+  if (length(extras)) {
+    existing <- !is.na(match(names(extras), names(call)))
+    for (a in names(extras)[existing]) call[[a]] <- extras[[a]]
+    if (any(!existing)) {
+      call <- c(as.list(call), extras[!existing])
+      call <- as.call(call)
+    }
+  }
+
+  if (evaluate) eval(call, parent.frame()) else call
+}
+
 

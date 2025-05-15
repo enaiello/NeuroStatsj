@@ -1,4 +1,4 @@
-
+ERROR_TABLE="issues"
 ### these are definitions of functions and translations
 TRANSFUN<-list()
 TRANSFUN[["lin"]]<-list(id="lin",name="Linear",fun=identity,label=function(x) sprintf("%s",x))
@@ -15,7 +15,9 @@ TRANSFUN[["none"]]<-list(id="none",name="None",fun=identity,label=function(x) sp
 
 MODEL_TYPE<-list()
 MODEL_TYPE[["lm"]]<-list(id="lm",name="Linear",fun=stats::lm)
-MODEL_TYPE[["nb"]]<-list(id="nb",name="Negative Binobial",fun=MASS::neg.bin)
+MODEL_TYPE[["nb"]]<-list(id="nb",name="Negative Binobial",fun=MASS::glm.nb)
+MODEL_TYPE[["beta"]]<-list(id="beta",name="Beta",fun=betareg::betareg)
+MODEL_TYPE[["pois"]]<-list(id="pois",name="Poisson",fun=stats::glm,opts=list(family=stats::poisson()))
 
 METHOD_LABEL<-list()
 METHOD_LABEL[["user"]]<-"User"

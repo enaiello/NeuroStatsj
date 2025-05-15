@@ -325,11 +325,11 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="test", 
                         `type`="number", 
-                        `title`="t"),
+                        `title`="z"),
                     list(
                         `name`="df", 
                         `type`="integer", 
-                        `title`="df"),
+                        `title`="df_res"),
                     list(
                         `name`="p", 
                         `title`="p", 
@@ -363,7 +363,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="test", 
                         `type`="number", 
-                        `title`="t"),
+                        `title`="z"),
                     list(
                         `name`="df", 
                         `type`="integer", 
@@ -397,7 +397,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="test", 
                         `type`="number", 
-                        `title`="t"),
+                        `title`="z"),
                     list(
                         `name`="df", 
                         `type`="integer", 

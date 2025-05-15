@@ -25,13 +25,16 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 aSmartObj <- SmartTable$new(self$results$univariate, private$.runner)
                 aSmartObj$spaceBy <-"name"
                 aSmartObj$combineBelow <-"name"
+                aSmartObj$hideOn <- list(r2 = NA,df=NA)
                 ladd(private$.smartObjs) <- aSmartObj
 
                 ### multiple table ###
                 aSmartObj <- SmartTable$new(self$results$multiple, private$.runner)
                 ladd(private$.smartObjs) <- aSmartObj
+                aSmartObj$hideOn <- list(df = NA)
                 ### final table ###
                 aSmartObj <- SmartTable$new(self$results$final, private$.runner)
+                aSmartObj$hideOn <- list(df = NA)
                 ladd(private$.smartObjs) <- aSmartObj
 
                 ### init all ####

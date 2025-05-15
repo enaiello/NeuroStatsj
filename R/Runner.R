@@ -11,11 +11,14 @@ Runner <- R6::R6Class("Runner",
         multiple_tab=NULL,
         final_tab=NULL,
         run = function() {
-            # this is run before any table or plot is filled.
-            # it produces the basic estimation required for all tables and plots
-            # it fills self$data with all power parameters
+          
+            ## we stop if initier is not ok
+            if (!self$ok) return()
             jinfo("NeuroStatsj: Runner: estimations")
-            self$machine$data<-self$data
+            self$machine$data<-private$.checkdata()
+            ## we stop if data are not ok
+            if (!self$ok) return()
+
             self$univariate_tab<-self$machine$univariate()
             self$machine$find_best()
             self$multiple_tab<-self$machine$multiple()
@@ -23,9 +26,18 @@ Runner <- R6::R6Class("Runner",
             form<-self$machine$pretty_formulate()
             self$warning<-list(topic="formula",message=form,head="info")
 
+            ### fix some column name            
+            if (self$options$model_type=="lm") {
+              attr(self$univariate_tab,"titles")<-list(test="t")
+              attr(self$multiple_tab,"titles")<-list(test="t")
+              attr(self$final_tab,"titles")<-list(test="t")
+
+            }
+
         },
         run_univariate= function() {
-          self$univariate_tab
+          tab<-self$univariate_tab
+          tab
         },
         run_multiple= function() {
           self$multiple_tab
@@ -47,7 +59,7 @@ Runner <- R6::R6Class("Runner",
                             selected=selected,
                             selected_trans=trans)
           }
-          mark(res)
+         
           res
         }
 
@@ -55,6 +67,7 @@ Runner <- R6::R6Class("Runner",
     ), # end of public 
 
     private = list(
-        # do private stuff
+      
+
     ) # end of private
 ) # end of class

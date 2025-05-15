@@ -60,10 +60,10 @@ items:
                 title: SE
             -   name: test
                 type: number
-                title: t
+                title: z
             -   name: df
                 type: integer
-                title: df
+                title: df_res
             -   name: p
                 title: p
                 type: number
@@ -91,7 +91,7 @@ items:
                 title: AIC
             -   name:  test
                 type: number
-                title: t
+                title: z
             -   name: df
                 type: integer
                 title: df
@@ -118,7 +118,7 @@ items:
                 title: SE
             -   name: test
                 type: number
-                title: t
+                title: z
             -   name: df
                 type: integer
                 title: df

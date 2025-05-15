@@ -63,7 +63,7 @@ options:
             -   name:  nb
                 title: Negative Binomial
             -   name:  pois
-                title: Poisson (overdispersion)
+                title: Poisson 
             -   name:  beta
                 title: Beta regression
 

@@ -13,7 +13,7 @@ Scaffold <- R6::R6Class("Scaffold",
                             },
                             option=function(val,spec=NULL) {
                               
-                              res<-is.joption(self$options,val)
+                              res<-(val %in% names(self$options))
                               if (res) {
                                 if (is.logical(self$options[[val]]))
                                   res<-self$options[[val]]
