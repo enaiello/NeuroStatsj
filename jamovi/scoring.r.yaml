@@ -124,6 +124,17 @@ items:
                 type: number
                 format: zto,pvalue
 
+    -   name: plots
+        type: Group
+        title: Plots
+        items:
+        -   name: adj_es
+            title: Adj. Scores histogram
+            type: Image
+            renderFun: .adj_hist
+            width: 700
+            height: 400
+
 
     -   name: scores
         type: Group
@@ -132,6 +143,36 @@ items:
           -   name: formula
               title: Formula
               type: Html
+
+          -   name: es
+              title: Equivalent Scores
+              type: Table
+              columns:
+                     - name: method
+                       title: Method
+                       type: text
+                     - name: es0
+                       title: "0"
+                       type: text
+                     - name: es1
+                       title: "1"
+                       type: text
+                     - name: es2
+                       title: "2"
+                       type: text
+                     - name: es3
+                       title: "3"
+                       type: text
+                     - name: es4
+                       title: "4"
+                       type: text
+                     - name: otl
+                       title: oTL
+                       type: number
+                     - name: itl
+                       title: iTL
+                       type: number
+
         
           -   name: percentiles
               title: Percentiles
@@ -159,3 +200,6 @@ items:
                      - name: adj
                        title: Adj.Value
                        type: number
+
+
+

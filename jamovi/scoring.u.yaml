@@ -195,7 +195,9 @@ children:
           - type: Label
             label: Equivalent score
             children:
-              - name: es_zscore
+              - name: es_zbinom
+                type: CheckBox
+              - name: es_zbeta
                 type: CheckBox
               - name: es_rank
                 type: CheckBox

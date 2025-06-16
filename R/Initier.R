@@ -75,6 +75,7 @@ Initer <- R6::R6Class(
           
           ## prepare the adjuster
           self$adjuster<-Adjuster$new()
+          self$adjuster$which_worse<-self$options$direction
 
             
         },
@@ -89,11 +90,23 @@ Initer <- R6::R6Class(
            self$machine$univariate()
 
         },
+
         init_multiple= function() {
   
           c(self$machine$covs_info,self$machine$factors)
 
         },
+        init_scores_es= function() {
+  
+           tab<-list()
+          if (self$options$es_zbinom) ladd(tab)<-list("method"="Binomial")
+          if (self$options$es_zbeta)  ladd(tab)<-list("method"="Beta")
+          if (self$options$es_rank)   ladd(tab)<-list("method"="Percentiles")
+          return(tab)
+
+
+        },
+        
         init_scores_percentiles= function() {
   
 

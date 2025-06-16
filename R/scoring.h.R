@@ -17,10 +17,11 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "rec"),
             select = TRUE,
             method = "step",
-            direction = "low",
+            direction = "high",
             forced = NULL,
             included = NULL,
-            es_zscore = TRUE,
+            es_zbinom = TRUE,
+            es_zbeta = FALSE,
             es_rank = FALSE,
             perc = TRUE,
             perc_type = "eby5",
@@ -102,7 +103,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..direction <- jmvcore::OptionList$new(
                 "direction",
                 direction,
-                default="low",
+                default="high",
                 options=list(
                     "low",
                     "high"))
@@ -137,10 +138,14 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "included",
                 included,
                 default=NULL)
-            private$..es_zscore <- jmvcore::OptionBool$new(
-                "es_zscore",
-                es_zscore,
+            private$..es_zbinom <- jmvcore::OptionBool$new(
+                "es_zbinom",
+                es_zbinom,
                 default=TRUE)
+            private$..es_zbeta <- jmvcore::OptionBool$new(
+                "es_zbeta",
+                es_zbeta,
+                default=FALSE)
             private$..es_rank <- jmvcore::OptionBool$new(
                 "es_rank",
                 es_rank,
@@ -200,7 +205,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..direction)
             self$.addOption(private$..forced)
             self$.addOption(private$..included)
-            self$.addOption(private$..es_zscore)
+            self$.addOption(private$..es_zbinom)
+            self$.addOption(private$..es_zbeta)
             self$.addOption(private$..es_rank)
             self$.addOption(private$..perc)
             self$.addOption(private$..perc_type)
@@ -222,7 +228,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         direction = function() private$..direction$value,
         forced = function() private$..forced$value,
         included = function() private$..included$value,
-        es_zscore = function() private$..es_zscore$value,
+        es_zbinom = function() private$..es_zbinom$value,
+        es_zbeta = function() private$..es_zbeta$value,
         es_rank = function() private$..es_rank$value,
         perc = function() private$..perc$value,
         perc_type = function() private$..perc_type$value,
@@ -243,7 +250,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..direction = NA,
         ..forced = NA,
         ..included = NA,
-        ..es_zscore = NA,
+        ..es_zbinom = NA,
+        ..es_zbeta = NA,
         ..es_rank = NA,
         ..perc = NA,
         ..perc_type = NA,
@@ -266,6 +274,7 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         final = function() private$.items[["final"]],
         univariate = function() private$.items[["univariate"]],
         multiple = function() private$.items[["multiple"]],
+        plots = function() private$.items[["plots"]],
         scores = function() private$.items[["scores"]]),
     private = list(),
     public=list(
@@ -426,7 +435,26 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
+                    adj_es = function() private$.items[["adj_es"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="plots",
+                            title="Plots")
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="adj_es",
+                            title="Adj. Scores histogram",
+                            renderFun=".adj_hist",
+                            width=700,
+                            height=400))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
                     formula = function() private$.items[["formula"]],
+                    es = function() private$.items[["es"]],
                     percentiles = function() private$.items[["percentiles"]],
                     raws = function() private$.items[["raws"]]),
                 private = list(),
@@ -440,6 +468,43 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             options=options,
                             name="formula",
                             title="Formula"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="es",
+                            title="Equivalent Scores",
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="es0", 
+                                    `title`="0", 
+                                    `type`="text"),
+                                list(
+                                    `name`="es1", 
+                                    `title`="1", 
+                                    `type`="text"),
+                                list(
+                                    `name`="es2", 
+                                    `title`="2", 
+                                    `type`="text"),
+                                list(
+                                    `name`="es3", 
+                                    `title`="3", 
+                                    `type`="text"),
+                                list(
+                                    `name`="es4", 
+                                    `title`="4", 
+                                    `type`="text"),
+                                list(
+                                    `name`="otl", 
+                                    `title`="oTL", 
+                                    `type`="number"),
+                                list(
+                                    `name`="itl", 
+                                    `title`="iTL", 
+                                    `type`="number"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="percentiles",
@@ -515,7 +580,8 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param forced a named vector of the form \code{c(var1="type",
 #'   var2="type2")}
 #' @param included .
-#' @param es_zscore .
+#' @param es_zbinom .
+#' @param es_zbeta .
 #' @param es_rank .
 #' @param perc .
 #' @param perc_type .
@@ -534,7 +600,9 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plots$adj_es} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$scores$formula} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$scores$es} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$scores$percentiles} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$scores$raws} \tab \tab \tab \tab \tab a table \cr
 #' }
@@ -559,10 +627,11 @@ scoring <- function(
                 "rec"),
     select = TRUE,
     method = "step",
-    direction = "low",
+    direction = "high",
     forced = NULL,
     included = NULL,
-    es_zscore = TRUE,
+    es_zbinom = TRUE,
+    es_zbeta = FALSE,
     es_rank = FALSE,
     perc = TRUE,
     perc_type = "eby5",
@@ -601,7 +670,8 @@ scoring <- function(
         direction = direction,
         forced = forced,
         included = included,
-        es_zscore = es_zscore,
+        es_zbinom = es_zbinom,
+        es_zbeta = es_zbeta,
         es_rank = es_rank,
         perc = perc,
         perc_type = perc_type,

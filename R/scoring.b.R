@@ -37,6 +37,11 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 aSmartObj$hideOn <- list(df = NA)
                 ladd(private$.smartObjs) <- aSmartObj
 
+                ### scores_es table ###
+                aSmartObj <- SmartTable$new(self$results$scores$es, private$.runner)
+                aSmartObj$combineBelow <- "method"
+                ladd(private$.smartObjs) <- aSmartObj
+
                 ### scores_percentiles table ###
                 aSmartObj <- SmartTable$new(self$results$scores$percentiles, private$.runner)
                 ladd(private$.smartObjs) <- aSmartObj
@@ -51,6 +56,9 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 for (tab in private$.smartObjs) {
                     tab$initTable()
                 }
+                
+                private$.plotter <- Plotter$new(self, private$.runner)
+                private$.plotter$init_plots()
             
         },
         
@@ -61,6 +69,7 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             for (tab in private$.smartObjs) {
                     tab$runTable()
                 }
+            private$.plotter$prepare_plots()
             
             
         },
@@ -70,6 +79,13 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### coded well, etc.
             ### for now, it just remove the missing
             private$.data<-jmvcore::naOmit(self$data)
+        },
+        ### plots
+        
+        .plot_adjusted=function(image, ggtheme, theme, ...) {
+            plot <- private$.plotter$plot_adjusted(image, ggtheme, theme)
+            return(plot)
+          
         }
 
     )

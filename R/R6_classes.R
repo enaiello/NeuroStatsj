@@ -2,12 +2,13 @@ Adjuster <- R6::R6Class("Adjuster",
   public = list(
   
     perc_type=NULL,
-    perc_dir ="inc",    
+    which_worse ="high",    
     adjust=function() {
       
       if (is.null(self$model)) stop("Please pass a model before adjusting")
       
       model<-self$model
+      if (length(model$coefficients)==1) return(model.response(model.frame(model)))
       cat ("adjusting with ", deparse(stats::formula(model)))
       dep<-stats::formula(model)[[2]]
       terms<-colnames(attr(terms(model),"factors"))
@@ -37,14 +38,38 @@ Adjuster <- R6::R6Class("Adjuster",
       ps<-data.frame(val=quantile(values, probs = p))
       ps$perc<-rownames(ps)
       rownames(ps)<-NULL
-      if (self$perc_dir=="dec") {
+      if (self$which_worse=="higher") {
         ps<-ps[order(ps$val,decreasing=TRUE),]
         ps$perc<-rev(ps$perc)
         rownames(ps)<-NULL
       }
       ps
       
+    },
+    
+      es_perc=function() {
+        values<-self$adjust()
+     
+        es_percentiles(values,worse=self$which_worse)
+
+    },
+     es_perc_pos=function() {
+        values<-self$adjust()
+        es_percentiles(values,worse=self$which_worse,what="position")
+    },
+
+    es_binom=function() {
+        values<-self$adjust()
+        es_normal(values,worse=self$which_worse,dist="binom")
+    },
+    es_beta=function() {
+        values<-self$adjust()
+        es_normal(values,worse=self$which_worse,dist="beta")
     }
+    
+
+
+    
   ), ## end of public
   active= list(
   
@@ -119,7 +144,7 @@ Selector <- R6::R6Class("Selector",
     model_type = NULL,
     dep        = NULL,
     adjuster   = NULL,
-    perc_direction  = "increasing",
+    which_worse  = "high",
     best_transf=list(),
     selected   = list(),
     included   = NULL,
@@ -201,10 +226,10 @@ Selector <- R6::R6Class("Selector",
       opts<-self$opts
       opts[["formula"]]<-form
       opts[["data"]]<-private$.data
+   
       model<-do.call(self$model_fun,opts)
       
       model<-fix_call(model)
-      
       scope<-list(lower=~1, upper=form)
       if (is.something(self$included)) {
         included<-self$best_transf[self$included]
@@ -214,6 +239,8 @@ Selector <- R6::R6Class("Selector",
 
       steps<-MASS::stepAIC(model,direction="both",trace=0, scope=scope)
       self$model<-steps
+      if (length(self$model$coefficients)==1)
+         return()
       res<-as.data.frame(summary(steps)$coefficients)[-1,]
       names(res)<-c("estimate","se","test","p")
       res$df<-stats::df.residual(steps)
@@ -227,6 +254,7 @@ Selector <- R6::R6Class("Selector",
         if (any(res$rowname==var$var)) self$selected[[var$name]]<-var
       }
       self$stepwise<-res
+ 
       return(res)
 
     },
@@ -265,7 +293,7 @@ Selector <- R6::R6Class("Selector",
     percentiles=function(what=NULL) {
       
       self$adjuster<-Adjuster$new(self$model)
-      self$adjuster$percentiles(what, self$perc_direction)
+      self$adjuster$percentiles(what)
       
     },
 
@@ -311,7 +339,6 @@ Selector <- R6::R6Class("Selector",
         private$.covs_info<-alist
         lapply(alist,function(x) {
            private$.covs[[x$name]]$name<-x$name 
-           mark(x$name,x$forced)
            if(is.null(x$forced) || isFALSE(x$forced)) private$.covs[[x$name]]$transformations<-private$.transformations
            else private$.covs[[x$name]]$transformations<-list(TRANSFUN[[x$forced]])
            })
