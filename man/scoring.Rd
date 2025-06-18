@@ -13,15 +13,19 @@ scoring(
   covsTransformations = list("lin", "ln", "log100", "rec"),
   select = TRUE,
   method = "step",
-  direction = "low",
+  direction = "high",
   forced = NULL,
   included = NULL,
   es_zscore = TRUE,
   es_rank = FALSE,
   perc = TRUE,
   perc_type = "eby5",
-  score_adjust = TRUE,
+  score_adjust = FALSE,
   score_raw = FALSE,
+  score_preds = FALSE,
+  score_sort = "none",
+  plots = list(),
+  plot_es = FALSE,
   .caller = "scoring",
   .interface = "jamovi"
 )
@@ -62,6 +66,14 @@ var2="type2")}}
 
 \item{score_raw}{.}
 
+\item{score_preds}{.}
+
+\item{score_sort}{.}
+
+\item{plots}{.}
+
+\item{plot_es}{.}
+
 \item{.caller}{.}
 
 \item{.interface}{.}
@@ -72,11 +84,18 @@ A results object containing:
   \code{results$info} \tab \tab \tab \tab \tab a html \cr
   \code{results$extrainfo} \tab \tab \tab \tab \tab a html \cr
   \code{results$issues} \tab \tab \tab \tab \tab a html \cr
-  \code{results$formula} \tab \tab \tab \tab \tab a html \cr
   \code{results$varstab} \tab \tab \tab \tab \tab a table \cr
   \code{results$final} \tab \tab \tab \tab \tab a table \cr
   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plots$adj} \tab \tab \tab \tab \tab an image \cr
+  \code{results$plots$adj_obs} \tab \tab \tab \tab \tab an image \cr
+  \code{results$plots$adj_pred} \tab \tab \tab \tab \tab an array \cr
+  \code{results$plots$issues} \tab \tab \tab \tab \tab a html \cr
+  \code{results$scores$formula} \tab \tab \tab \tab \tab a html \cr
+  \code{results$scores$es} \tab \tab \tab \tab \tab a table \cr
+  \code{results$scores$percentiles} \tab \tab \tab \tab \tab a table \cr
+  \code{results$scores$raws} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

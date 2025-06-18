@@ -1,11 +1,14 @@
 ---
 title: Useful Stats for Neuropsychologits
 name: NeuroStatsj
-version: 0.0.2
+version: 0.0.3
 jms: '1.0'
 authors:
-  - Nicolò Aiello
   - Marcello Gallucci
+  - Nicolò Aiello
+  - Daniele Romano
+  - Giorgio Arcara
+  - Alessio Facchin
 maintainer: Nicolò Aiello <yourself@somewhere.net>
 date: '2021-03-15'
 type: R

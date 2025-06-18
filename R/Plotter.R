@@ -112,7 +112,6 @@ Plotter <- R6::R6Class(
           dep <-self$runner$selector$dep
           df  <-self$runner$adjuster$es_default()
           df$x <- self$runner$data[,dep]
-          mark(dep,df)
           if (!self$option("plot_es")) df$es<-NULL
           aplot<-private$.results$plots$get("adj_obs")
           
