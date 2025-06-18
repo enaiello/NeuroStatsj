@@ -123,17 +123,42 @@ items:
                 title: p
                 type: number
                 format: zto,pvalue
-
     -   name: plots
         type: Group
         title: Plots
         items:
-        -   name: adj_es
-            title: Adj. Scores histogram
-            type: Image
-            renderFun: .adj_hist
-            width: 700
-            height: 400
+         -   name: adj
+             title: Adj. Scores histogram
+             type: Image
+             renderFun: .plot_adj
+             width: 700
+             height: 400
+             visible: (plots:adj)
+
+         -   name: adj_obs
+             title: Adj. Scores - Observed
+             type: Image
+             renderFun: .plot_adj_obs
+             width: 700
+             height: 400
+             visible: (plots:adj_obs)
+
+
+         -   name: adj_pred
+             title: Adj. Scores - Predictors
+             type: Array
+             visible: (plots:adj_pred)
+             template:
+                title: ''
+                type: Image
+                renderFun: .plot_adj_pred
+                width: 700
+                height: 400
+     
+         -   name: issues
+             title: Info
+             type: Html
+             visible: false
 
 
     -   name: scores

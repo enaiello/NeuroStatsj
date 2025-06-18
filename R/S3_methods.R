@@ -131,7 +131,6 @@ coefficients_table <- function(model) UseMethod(".coefficients")
 
 .coefficients.default <-function(model) {
   
-  jinfo("coefficient table for default model")
   tab<-as.data.frame(summary(model)$coefficients)[-1,]
   names(tab)<-c("estimate","se","test","p")
 
@@ -145,7 +144,6 @@ coefficients_table <- function(model) UseMethod(".coefficients")
 
 .coefficients.lm <-function(model) {
 
-    jinfo("coefficient table for lm")
   tab<-as.data.frame(summary(model)$coefficients)[-1,]
   names(tab)<-c("estimate","se","test","p")
   tab$df <- df.residual(model)

@@ -6,7 +6,7 @@ Initer <- R6::R6Class(
     public = list(
         dispatcher = NULL,
         data = NULL,
-        machine= NULL,
+        selector= NULL,
         adjuster=NULL,
         initialize = function(jmvobj) {
             super$initialize(jmvobj)
@@ -34,12 +34,12 @@ Initer <- R6::R6Class(
             
             if (!self$ok) return()
             
-          ## set the selector clss as the machine
-          self$machine<-Selector$new(private$.checkdata())
+          ## set the selector clss as the selector
+          self$selector<-Selector$new(private$.checkdata())
           ## general stuff
-          self$machine$model_fun<- MODEL_TYPE[[self$options$model_type]]$fun
-          self$machine$opts <- MODEL_TYPE[[self$options$model_type]]$opts
-          self$machine$transformations<-self$options$covsTransformations
+          self$selector$model_fun<- MODEL_TYPE[[self$options$model_type]]$fun
+          self$selector$opts <- MODEL_TYPE[[self$options$model_type]]$opts
+          self$selector$transformations<-self$options$covsTransformations
 
           ## deal with variables
           forced<-self$options$forced
@@ -68,39 +68,38 @@ Initer <- R6::R6Class(
                     method=METHOD_LABEL[[method]]
                     list(name=x,type="Factor",transf="None",include=inc, method=method)
           })
-          ## fill the machine
-          self$machine$dep<-self$options$dep
-          self$machine$covs<-covs
-          self$machine$factors<-factors
+          ## fill the selector
+          self$selector$dep<-self$options$dep
+          self$selector$covs<-covs
+          self$selector$factors<-factors
           
           ## prepare the adjuster
-          self$adjuster<-Adjuster$new()
+          self$adjuster<-Adjuster$new(self$analysis)
           self$adjuster$which_worse<-self$options$direction
 
             
         },
         init_varstab= function() {
           
-          c(self$machine$covs_info,self$machine$factors)
+          c(self$selector$covs_info,self$selector$factors)
 
           
           },
         init_univariate= function() {
   
-           self$machine$univariate()
+           self$selector$univariate()
 
         },
 
         init_multiple= function() {
   
-          c(self$machine$covs_info,self$machine$factors)
+          c(self$selector$covs_info,self$selector$factors)
 
         },
         init_scores_es= function() {
   
            tab<-list()
-          if (self$options$es_zbinom) ladd(tab)<-list("method"="Binomial")
-          if (self$options$es_zbeta)  ladd(tab)<-list("method"="Beta")
+          if (self$options$es_zscore) ladd(tab)<-list("method"="z-scores")
           if (self$options$es_rank)   ladd(tab)<-list("method"="Percentiles")
           return(tab)
 

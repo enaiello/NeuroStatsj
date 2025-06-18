@@ -63,12 +63,14 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .run = function() {
-            ginfo("run")
+
+            jinfo(paste("MODULE:  NeuroStatsj #### phase run  ####"))
+
             private$.runner$data<-stats::na.omit(self$data)
             private$.runner$run()
             for (tab in private$.smartObjs) {
                     tab$runTable()
-                }
+            }
             private$.plotter$prepare_plots()
             
             
@@ -82,11 +84,23 @@ scoringClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         ### plots
         
-        .plot_adjusted=function(image, ggtheme, theme, ...) {
+        .plot_adj=function(image, ggtheme, theme, ...) {
             plot <- private$.plotter$plot_adjusted(image, ggtheme, theme)
             return(plot)
           
+        },
+        .plot_adj_obs=function(image, ggtheme, theme, ...) {
+            plot <- private$.plotter$plot_adj_obs(image, ggtheme, theme)
+            return(plot)
+          
+        },
+        .plot_adj_pred=function(image, ggtheme, theme, ...) {
+            plot <- private$.plotter$plot_adj_pred(image, ggtheme, theme)
+            return(plot)
+          
         }
+        
+        
 
     )
 )

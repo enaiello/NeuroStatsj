@@ -15,19 +15,19 @@ Runner <- R6::R6Class("Runner",
             ## we stop if initier is not ok
             if (!self$ok) return()
             jinfo("NeuroStatsj: Runner: estimations")
-            ### self$machine is the selector initialized in Initier
-            self$machine$data<-private$.checkdata()
+            ### self$selector is the selector initialized in Initier
+            self$selector$data<-private$.checkdata()
             ## we stop if data are not ok
             if (!self$ok) return()
 
-            self$univariate_tab<-self$machine$univariate()
-            self$machine$find_best()
-            self$multiple_tab<-self$machine$multiple()
-            self$final_tab<-self$machine$select()
+            self$univariate_tab<-self$selector$univariate()
+            self$selector$find_best()
+            self$multiple_tab<-self$selector$multiple()
+            self$final_tab<-self$selector$select()
             if (is.null(self$final_tab)) {
               self$final_tab<-list(list(name="No predictors", fun="Original score"))
             }
-            form<-self$machine$pretty_formulate()
+            form<-self$selector$pretty_formulate()
             self$warning<-list(topic="scores_formula",message=form,head="info")
 
             ### fix some column name            
@@ -39,7 +39,7 @@ Runner <- R6::R6Class("Runner",
             }
             
             ## fill the adjuster
-            self$adjuster$model<-self$machine$model
+            self$adjuster$model<-self$selector$model
             
 
         },
@@ -55,12 +55,12 @@ Runner <- R6::R6Class("Runner",
         },
         run_varstab= function() {
           res<-list()
-          for (var in self$machine$vars) {
+          for (var in self$selector$vars) {
               trans<-"None"
               selected="False"
-              test<-self$machine$selected[[var$name]]
+              test<-self$selector$selected[[var$name]]
               if (length(test)>0) {
-                      trans<-TRANSFUN[[self$machine$selected[[var$name]]$id]]$label(var$name)
+                      trans<-TRANSFUN[[self$selector$selected[[var$name]]$id]]$label(var$name)
                       selected="True"
               }
             ladd(res)<-list(name=var$name,
@@ -79,11 +79,9 @@ Runner <- R6::R6Class("Runner",
         run_scores_es = function() {
           
           tab<-list()
-          if (self$options$es_zbinom) ladd(tab)<-self$adjuster$es_binom()
-          if (self$options$es_zbeta)  ladd(tab)<-self$adjuster$es_beta()
+          if (self$options$es_zscore) ladd(tab)<-self$adjuster$es_zscore()
           if (self$options$es_rank)   ladd(tab)<-self$adjuster$es_perc()
           tab<-as.data.frame(do.call(rbind,tab))
-          mark(tab)
           tab<-fix_es(tab,self$options$direction)
           return(tab)
         },
@@ -92,10 +90,10 @@ Runner <- R6::R6Class("Runner",
           
           data<-data.frame(id=rownames(self$data))
           data$adj<-unlist(self$adjuster$adjust())
-          data$raw<-self$machine$data[[self$options$dep]]
+          data$raw<-self$selector$data[[self$options$dep]]
           if (self$options$score_preds) {
-          for (var in self$machine$selected)
-               data[[var$name]]<-self$machine$data[[var$name]]
+          for (var in self$selector$selected)
+               data[[var$name]]<-self$selector$data[[var$name]]
           }
      
           if ("inc" %in% self$options$score_sort) 

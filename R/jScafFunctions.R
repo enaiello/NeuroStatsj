@@ -260,6 +260,8 @@ ebind_square<-function(...) {
   
 }
 
+## lists
+
 `ladd<-`<-function(x,value) {
   x[[length(x)+1]]<-value
   return(x)
@@ -270,6 +272,9 @@ ebind_square<-function(...) {
   x[[1]] <- value
   x
 }
+
+list_get<-function(alist,what) unlist(lapply(alist,function(x) x[[what]]))
+
 
 ###########
 

@@ -164,14 +164,10 @@ options:
     -   name:  included
         type: Variables
         default: ~
-    -   name: es_zbinom
-        title: z-score (binomial) 
+    -   name: es_zscore
+        title: z-score  
         type: Bool
         default: true
-    -   name: es_zbeta
-        title: z-score (beta dist) 
-        type: Bool
-        default: false
     -   name: es_rank
         title: Rank-based 
         type: Bool
@@ -220,6 +216,23 @@ options:
                 title: Increasing
             -   name: dec
                 title: Decreasing
+
+    -   name: plots
+        type: NMXList
+        default: []
+        options:
+             - name: adj
+               title: Adj. Score histogram
+             - name: adj_obs
+               title: Adj. Score - Observed
+             - name: adj_pred
+               title: Adj. Score - Predictors
+             
+    -   name: plot_es
+        title: With Equivalent scores 
+        type: Bool
+        default: false
+             
 
 
     -   name: .caller

@@ -8,6 +8,7 @@ contrasts(f)<- structure(matrix(c(-0.5, 0.5), ncol = 1), dimnames = list(NULL, "
 model<-MASS::glm.nb(y~x)
 betareg::betar_family()
 
+model.response(model.frame(model))
 model<-betareg::betareg(y~x)
 model$pseudo.r.squared
 #model<-lm(y~f)

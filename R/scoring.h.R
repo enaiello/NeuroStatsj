@@ -20,8 +20,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             direction = "high",
             forced = NULL,
             included = NULL,
-            es_zbinom = TRUE,
-            es_zbeta = FALSE,
+            es_zscore = TRUE,
             es_rank = FALSE,
             perc = TRUE,
             perc_type = "eby5",
@@ -29,6 +28,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             score_raw = FALSE,
             score_preds = FALSE,
             score_sort = "none",
+            plots = list(),
+            plot_es = FALSE,
             .caller = "scoring",
             .interface = "jamovi", ...) {
 
@@ -138,14 +139,10 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "included",
                 included,
                 default=NULL)
-            private$..es_zbinom <- jmvcore::OptionBool$new(
-                "es_zbinom",
-                es_zbinom,
+            private$..es_zscore <- jmvcore::OptionBool$new(
+                "es_zscore",
+                es_zscore,
                 default=TRUE)
-            private$..es_zbeta <- jmvcore::OptionBool$new(
-                "es_zbeta",
-                es_zbeta,
-                default=FALSE)
             private$..es_rank <- jmvcore::OptionBool$new(
                 "es_rank",
                 es_rank,
@@ -184,6 +181,18 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "none",
                     "inc",
                     "dec"))
+            private$..plots <- jmvcore::OptionNMXList$new(
+                "plots",
+                plots,
+                default=list(),
+                options=list(
+                    "adj",
+                    "adj_obs",
+                    "adj_pred"))
+            private$..plot_es <- jmvcore::OptionBool$new(
+                "plot_es",
+                plot_es,
+                default=FALSE)
             private$...caller <- jmvcore::OptionString$new(
                 ".caller",
                 .caller,
@@ -205,8 +214,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..direction)
             self$.addOption(private$..forced)
             self$.addOption(private$..included)
-            self$.addOption(private$..es_zbinom)
-            self$.addOption(private$..es_zbeta)
+            self$.addOption(private$..es_zscore)
             self$.addOption(private$..es_rank)
             self$.addOption(private$..perc)
             self$.addOption(private$..perc_type)
@@ -214,6 +222,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..score_raw)
             self$.addOption(private$..score_preds)
             self$.addOption(private$..score_sort)
+            self$.addOption(private$..plots)
+            self$.addOption(private$..plot_es)
             self$.addOption(private$...caller)
             self$.addOption(private$...interface)
         }),
@@ -228,8 +238,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         direction = function() private$..direction$value,
         forced = function() private$..forced$value,
         included = function() private$..included$value,
-        es_zbinom = function() private$..es_zbinom$value,
-        es_zbeta = function() private$..es_zbeta$value,
+        es_zscore = function() private$..es_zscore$value,
         es_rank = function() private$..es_rank$value,
         perc = function() private$..perc$value,
         perc_type = function() private$..perc_type$value,
@@ -237,6 +246,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         score_raw = function() private$..score_raw$value,
         score_preds = function() private$..score_preds$value,
         score_sort = function() private$..score_sort$value,
+        plots = function() private$..plots$value,
+        plot_es = function() private$..plot_es$value,
         .caller = function() private$...caller$value,
         .interface = function() private$...interface$value),
     private = list(
@@ -250,8 +261,7 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..direction = NA,
         ..forced = NA,
         ..included = NA,
-        ..es_zbinom = NA,
-        ..es_zbeta = NA,
+        ..es_zscore = NA,
         ..es_rank = NA,
         ..perc = NA,
         ..perc_type = NA,
@@ -259,6 +269,8 @@ scoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..score_raw = NA,
         ..score_preds = NA,
         ..score_sort = NA,
+        ..plots = NA,
+        ..plot_es = NA,
         ...caller = NA,
         ...interface = NA)
 )
@@ -435,7 +447,10 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    adj_es = function() private$.items[["adj_es"]]),
+                    adj = function() private$.items[["adj"]],
+                    adj_obs = function() private$.items[["adj_obs"]],
+                    adj_pred = function() private$.items[["adj_pred"]],
+                    issues = function() private$.items[["issues"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -445,11 +460,36 @@ scoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             title="Plots")
                         self$add(jmvcore::Image$new(
                             options=options,
-                            name="adj_es",
+                            name="adj",
                             title="Adj. Scores histogram",
-                            renderFun=".adj_hist",
+                            renderFun=".plot_adj",
                             width=700,
-                            height=400))}))$new(options=options))
+                            height=400,
+                            visible="(plots:adj)"))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="adj_obs",
+                            title="Adj. Scores - Observed",
+                            renderFun=".plot_adj_obs",
+                            width=700,
+                            height=400,
+                            visible="(plots:adj_obs)"))
+                        self$add(jmvcore::Array$new(
+                            options=options,
+                            name="adj_pred",
+                            title="Adj. Scores - Predictors",
+                            visible="(plots:adj_pred)",
+                            template=jmvcore::Image$new(
+                                options=options,
+                                title="",
+                                renderFun=".plot_adj_pred",
+                                width=700,
+                                height=400)))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="issues",
+                            title="Info",
+                            visible=FALSE))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -580,8 +620,7 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param forced a named vector of the form \code{c(var1="type",
 #'   var2="type2")}
 #' @param included .
-#' @param es_zbinom .
-#' @param es_zbeta .
+#' @param es_zscore .
 #' @param es_rank .
 #' @param perc .
 #' @param perc_type .
@@ -589,6 +628,8 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param score_raw .
 #' @param score_preds .
 #' @param score_sort .
+#' @param plots .
+#' @param plot_es .
 #' @param .caller .
 #' @param .interface .
 #' @return A results object containing:
@@ -600,7 +641,10 @@ scoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$final} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$univariate} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multiple} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$plots$adj_es} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plots$adj} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plots$adj_obs} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plots$adj_pred} \tab \tab \tab \tab \tab an array \cr
+#'   \code{results$plots$issues} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$scores$formula} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$scores$es} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$scores$percentiles} \tab \tab \tab \tab \tab a table \cr
@@ -630,8 +674,7 @@ scoring <- function(
     direction = "high",
     forced = NULL,
     included = NULL,
-    es_zbinom = TRUE,
-    es_zbeta = FALSE,
+    es_zscore = TRUE,
     es_rank = FALSE,
     perc = TRUE,
     perc_type = "eby5",
@@ -639,6 +682,8 @@ scoring <- function(
     score_raw = FALSE,
     score_preds = FALSE,
     score_sort = "none",
+    plots = list(),
+    plot_es = FALSE,
     .caller = "scoring",
     .interface = "jamovi") {
 
@@ -670,8 +715,7 @@ scoring <- function(
         direction = direction,
         forced = forced,
         included = included,
-        es_zbinom = es_zbinom,
-        es_zbeta = es_zbeta,
+        es_zscore = es_zscore,
         es_rank = es_rank,
         perc = perc,
         perc_type = perc_type,
@@ -679,6 +723,8 @@ scoring <- function(
         score_raw = score_raw,
         score_preds = score_preds,
         score_sort = score_sort,
+        plots = plots,
+        plot_es = plot_es,
         .caller = .caller,
         .interface = .interface)
 

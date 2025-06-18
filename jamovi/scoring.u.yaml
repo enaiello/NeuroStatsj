@@ -101,7 +101,6 @@ children:
                     optionName: covsTransformations
                     optionPart: quad
                     enable: (select)
-
                   - name: covsTransformations_cub
                     type: CheckBox
                     optionName: covsTransformations
@@ -195,10 +194,9 @@ children:
           - type: Label
             label: Equivalent score
             children:
-              - name: es_zbinom
+              - name: es_zscore
                 type: CheckBox
-              - name: es_zbeta
-                type: CheckBox
+
               - name: es_rank
                 type: CheckBox
           - type: Label
@@ -211,32 +209,61 @@ children:
           - type: LayoutBox
             style: list
             stretchFactor: 1
-            children:  
-          
-                  - type: Label
-                    label: Data table
-                    children:
-                      - type: CheckBox
-                        name: score_adjust
-                      - type: CheckBox
-                        name: score_raw
-                        enable: (score_adjust)
-                      - type: CheckBox
-                        name: score_preds
-                        enable: (score_adjust)
-                  - type: Label
-                    label: Data sort
-                    children:
-                      - type: RadioButton
-                        name: sort_none
-                        optionName: score_sort
-                        optionPart: none
-                      - type: RadioButton
-                        name: sort_inc
-                        optionName: score_sort
-                        optionPart: inc
-                      - type: RadioButton
-                        name: sort_dec
-                        optionName: score_sort
-                        optionPart: dec
-      
+            children:
+              - type: Label
+                label: Data table
+                children:
+                  - type: CheckBox
+                    name: score_adjust
+                  - type: CheckBox
+                    name: score_raw
+                    enable: (score_adjust)
+                  - type: CheckBox
+                    name: score_preds
+                    enable: (score_adjust)
+              - type: Label
+                label: Data sort
+                children:
+                  - type: RadioButton
+                    name: sort_none
+                    optionName: score_sort
+                    optionPart: none
+                  - type: RadioButton
+                    name: sort_inc
+                    optionName: score_sort
+                    optionPart: inc
+                  - type: RadioButton
+                    name: sort_dec
+                    optionName: score_sort
+                    optionPart: dec
+ 
+  - name: panel_plot
+    type: CollapseBox
+    label: Plots
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        style: inline
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Adjusted Scores
+            children:
+                  - name: plots_adj
+                    type: CheckBox
+                    optionPart: adj
+                    optionName: plots
+                  - name: plots_adj_obs
+                    type: CheckBox
+                    optionPart: adj_obs
+                    optionName: plots
+                  - name: plots_adj_preds
+                    type: CheckBox
+                    optionPart: adj_pred
+                    optionName: plots
+          - type: Label
+            label: Options
+            children:
+                  - name: plot_es
+                    type: CheckBox

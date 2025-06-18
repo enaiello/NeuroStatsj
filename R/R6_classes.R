@@ -1,19 +1,20 @@
 Adjuster <- R6::R6Class("Adjuster",
+  inherit = Scaffold,
   public = list(
   
     perc_type=NULL,
     which_worse ="high",    
+    model_data=NULL,
     adjust=function() {
       
       if (is.null(self$model)) stop("Please pass a model before adjusting")
-      
       model<-self$model
       if (length(model$coefficients)==1) return(model.response(model.frame(model)))
-      cat ("adjusting with ", deparse(stats::formula(model)))
       dep<-stats::formula(model)[[2]]
       terms<-colnames(attr(terms(model),"factors"))
       mm<-model.matrix(model)
       mm<-mm[,attr(mm,"assign")>0]
+      self$model_data<-mm
       for (n in colnames(mm)) {
          if (length(unique(mm[,n]))==2) {
             mm[,n]<-as.numeric(as.character(mm[,n]))
@@ -47,33 +48,67 @@ Adjuster <- R6::R6Class("Adjuster",
       
     },
     
-      es_perc=function() {
+    es_perc=function() {
         values<-self$adjust()
-     
         es_percentiles(values,worse=self$which_worse)
 
     },
-     es_perc_pos=function() {
+    es_zscore=function() {
         values<-self$adjust()
-        es_percentiles(values,worse=self$which_worse,what="position")
+        es_normal(values,worse=self$which_worse)
     },
+    es_default= function() {
+      
+      if (self$option("zscore"))
+          return(self$es_class("es_zscore"))
+      else
+          return(self$es_class("es_rank"))
+            
+    },
+    es_class= function(what) {
+      
+       worse <- self$which_worse
+       
+       if (what == "zscore")
+           es    <- self$es_zscore()
+       else
+           es    <- self$es_perc()
+  
+      es0 <- es[1]
+      es1 <- es[2]
+      es2 <- es[3]
+      es3 <- es[4]
+      
+      scores<-self$adjust()
+      out <- numeric(length(scores))
+      
+     
 
-    es_binom=function() {
-        values<-self$adjust()
-        es_normal(values,worse=self$which_worse,dist="binom")
-    },
-    es_beta=function() {
-        values<-self$adjust()
-        es_normal(values,worse=self$which_worse,dist="beta")
+    if (worse == "low") {
+      out[scores <= es0] <- 0
+      out[scores > es0 & scores <= es1] <- 1
+      out[scores > es1 & scores <= es2] <- 2
+      out[scores > es2 & scores <= es3] <- 3
+      out[scores > es3] <- 4
+
+    } else {
+      out[scores >= es0] <- 0
+      out[scores < es0 & scores >= es1] <- 1
+      out[scores < es1 & scores >= es2] <- 2
+      out[scores < es2 & scores >= es3] <- 3
+      out[scores < es3] <- 4
     }
-    
+    out <- factor(paste0("ES", out), levels = paste0("ES", 0:4))
+    return(data.frame(score=scores,es=out))  
+
+   }
 
 
     
   ), ## end of public
   active= list(
   
-
+    
     model = function(model) {
           
       if (missing(model)) {
@@ -157,7 +192,9 @@ Selector <- R6::R6Class("Selector",
     univariate = function() { 
       
          df<-data.frame(name=NA,fun=NA,id=NA,type=NA)
-         tabname<-lapply(self$covs,function(x) lapply(x$transformations, function(z) z$name))
+         tabname<-lapply(self$
+                           
+                           covs,function(x) lapply(x$transformations, function(z) z$name))
          tabid<-lapply(self$covs,function(x) lapply(x$transformations, function(z) z$id))
        
          cols<-names(tabname)
@@ -259,44 +296,6 @@ Selector <- R6::R6Class("Selector",
 
     },
     
-    adjust=function() {
-      
-      self$adjuster<-Adjuster$new(self$model)
-      self$adjuster$adjust()
-      
-    },
-    approx_adjust=function() {
-      
-      if (is.null(self$model)) stop("Please estimate the model first.")
-      
-      expr_string <- make_hand_formula(self$model,self)  
-      with(private$.data, eval(parse(text = expr_string)))
-
-    },
-     eval_one=function(value,covs) {
-      
-      if (is.null(self$model)) stop("Please estimate the model first.")
-      values<-lapply(self$covs, function(x) {
-        if (!("selection" %in% names(x))) return()
-        x$selection$info$fun(covs[[x$name]])-x$selection$mean    
-      })
-      coefs<-coef(self$model)[-1]
-      adj<-value-sum(coefs * unlist(values))
-      ps<-self$percentiles()
-      p<-which.min(abs(adj-unlist(ps$val)))
-      print(adj)
-      print(p)
-
-     },
-
-
-    percentiles=function(what=NULL) {
-      
-      self$adjuster<-Adjuster$new(self$model)
-      self$adjuster$percentiles(what)
-      
-    },
-
     formulate=function() {
       
       if (is.null(self$model)) stop("Please estimate the model first.")

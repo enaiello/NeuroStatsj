@@ -1,6 +1,6 @@
 
 INFO<-list()
-INFO[["scoring"]]<-"<p>re you can obtain an adjusting function to adjust the target scores
+INFO[["scoring"]]<-"<p>Here you can obtain an adjusting function to adjust the target scores
                     by covariates or factors.</p>
                     <p> Please select:</p>
                     <ul>
